@@ -505,6 +505,7 @@ async function uploadPhoto(file, folder) {
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
 async function renderDashboard() {
+  console.log('renderDashboard called, currentUser:', currentUser);
   if (!currentUser || !currentUser.supabaseId) return;
   var { data: mine } = await _supa.from("cigar_logs").select("*")
     .eq("user_id", currentUser.supabaseId).order("date_smoked", { ascending: false });
