@@ -509,6 +509,7 @@ async function renderDashboard() {
   var { data: mine } = await _supa.from("cigar_logs").select("*")
     .eq("user_id", currentUser.supabaseId).order("date_smoked", { ascending: false });
   mine = mine || [];
+  console.log('Dashboard data:', mine, 'User ID:', currentUser.supabaseId);
   var btn = document.getElementById("navReviewsBtn");
   if (btn) btn.textContent = mine.length + " " + (mine.length === 1 ? "Review" : "Reviews");
   var grid = document.getElementById("cigarsGrid"); if (!grid) return;
