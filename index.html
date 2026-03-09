@@ -503,8 +503,9 @@ async function uploadPhoto(file, folder) {
 async function renderDashboard() {
   console.log("renderDashboard called, currentUser:", currentUser);
   if (!currentUser || !currentUser.supabaseId) return;
-  var { data: mine } = await _supa.from("cigar_logs").select("*")
+  var { data: mine, error: dashError } = await _supa.from("cigar_logs").select("*")
     .eq("user_id", currentUser.supabaseId).order("date_smoked", { ascending: false });
+  console.log("cigarlogs result:", mine, "error:", dashError);
   mine = mine || [];
   var btn = document.getElementById("navReviewsBtn");
   if (btn) btn.textContent = mine.length + " " + (mine.length === 1 ? "Review" : "Reviews");
@@ -513,6 +514,7 @@ async function renderDashboard() {
     grid.innerHTML = "<div style='text-align:center;padding:60px 20px;color:var(--ash);'><h3>Welcome! Log your first smoke.</h3></div>";
     return;
   }
+
   grid.innerHTML = mine.map(function(e) {
     var stars = e.rating ? e.rating + "/100" : "";
     var price = e.price  ? "$" + parseFloat(e.price).toFixed(2) : "";
