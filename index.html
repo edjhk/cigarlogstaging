@@ -125,8 +125,7 @@ window._supaReady = false;
         <input type="email" class="form-input" id="regEmail" placeholder="your@email.com"></div>
       <div class="form-group"><label class="form-label">Password</label>
         <input type="password" class="form-input" id="regPassword" placeholder=""></div>
-      <div class="form-group"><label class="form-label">Invite Code (optional)</label>
-        <input type="text" class="form-input" id="regInviteCode" placeholder="Leave blank if first user"></div>
+      <input type="hidden" id="regInviteCode" value="">
       <button id="regBtn" class="btn btn-primary" onclick="doRegister()" style="width:100%">Create Account</button>
       <div id="regError" style="font-size:0.82rem;margin-top:10px;text-align:center;color:var(--band-red)"></div>
       <div class="auth-toggle">Already a member? <a onclick="showAuthForm('login')">Sign in &rarr;</a></div>
@@ -1003,7 +1002,7 @@ async function regenerateInvite(oldId, name) {
     accepted_by: null
   }).eq('id', oldId);
   if (error) { showToast('Error: ' + error.message); return; }
-  var link = window.location.origin + window.location.pathname + '?invite=' + token;
+  var link = 'https://edjhk.github.io/cigarlog-source/#invite=' + token;
   document.getElementById('inviteLinkText').textContent = link;
   document.getElementById('inviteResult').style.display = 'block';
   showToast('New link generated for ' + name + '!');
@@ -1176,11 +1175,10 @@ function showToast(msg) {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
   await loadCA();
-
   const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
   const inviteToken = hashParams.get('invite');
-  if (inviteToken) {
-    const { data: inv } = await _supa.from('invites').select().eq('token', inviteToken).single();
+if (inviteToken) {
+  const { data: inv } = await supa.from('invites').select().eq('token', inviteToken).single();
   if (inv && !inv.used && new Date(inv.expires_at) > new Date()) {
     updateNav();
     showPage('auth');
@@ -1197,8 +1195,6 @@ async function init() {
   }
   return;
 }
-
-
 
   // Check session
   var session = localStorage.getItem('cl_session');
