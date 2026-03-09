@@ -305,26 +305,22 @@ var _feedChannel = null;
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 async function doLogin() {
-  var u = document.getElementById('regUsername').value.trim().toLowerCase();
-  var p = document.getElementById('regPassword').value;
-  var inviteCode = document.getElementById('regInviteCode').value.trim();
-  var err = document.getElementById('regError');
-  err.textContent = '';
-  if (!inviteCode) { err.textContent = 'A valid invite link is required to register.'; return; }
-  if (!u || !p || !dn) { err.textContent = 'All fields required.'; return; }
-  var btn = document.getElementById('loginBtn');
-  btn.textContent = 'Signing in...'; btn.disabled = true;
-  var { data, error } = await _supa.auth.signInWithPassword({ email: u + '@cigarlog.app', password: p });
-  if (error) { err.textContent = error.message; btn.textContent = 'Sign In'; btn.disabled = false; return; }
-  var { data: profile, error: profileError } = await _supa.from('profiles').select().eq('username', session).single();
-  console.log("profile:", profile, "error:", profileError);
-
-  if (!profile) { err.textContent = 'Profile not found.'; btn.textContent = 'Sign In'; btn.disabled = false; return; }
+  var u   = document.getElementById("loginUsername").value.trim().toLowerCase();
+  var p   = document.getElementById("loginPassword").value;
+  var err = document.getElementById("loginError");
+  err.textContent = "";
+  if (!u || !p) { err.textContent = "Username and password required."; return; }
+  var btn = document.getElementById("loginBtn");
+  btn.textContent = "Signing in..."; btn.disabled = true;
+  var { data, error } = await _supa.auth.signInWithPassword({ email: u + "@cigarlog.app", password: p });
+  if (error) { err.textContent = error.message; btn.textContent = "Sign In"; btn.disabled = false; return; }
+  var { data: profile } = await _supa.from("profiles").select().eq("username", u).single();
+  if (!profile) { err.textContent = "Profile not found."; btn.textContent = "Sign In"; btn.disabled = false; return; }
   currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.display_name, avatar: profile.avatar, isAdmin: profile.is_admin };
-  localStorage.setItem('cl_session', u);
-  btn.textContent = 'Sign In'; btn.disabled = false;
+  localStorage.setItem("cl_session", u);
+  btn.textContent = "Sign In"; btn.disabled = false;
   updateNav();
-  showPage('dashboard');
+  showPage("dashboard");
 }
 
 function showAuthForm(which) {
