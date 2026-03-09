@@ -670,7 +670,7 @@ function selectFamily(brandName, familyName) {
 }
 
 
-function selectCigar(brandName, familyName, cigarName) {
+async function selectCigar(brandName, familyName, cigarName) {
   var brand = null, family = null, cigar = null;
   for (var i = 0; i < caDatabase.length; i++) { if (caDatabase[i].name === brandName) { brand = caDatabase[i]; break; } }
   if (!brand) return;
@@ -679,33 +679,81 @@ function selectCigar(brandName, familyName, cigarName) {
   for (var i = 0; i < family.cigars.length; i++) { if (family.cigars[i].name === cigarName) { cigar = family.cigars[i]; break; } }
   if (!cigar) return;
   document.getElementById("mainSearch").value = "";
+
   var v = function(a,b) { return (a && a!=="N/A" && a!=="--") ? a : (b && b!=="N/A" && b!=="--") ? b : null; };
+
+  // Fetch CigarLog community average
+  var clScore = "Not yet reviewed";
+  var { data: logs } = await _supa.from("cigar_logs").select("rating")
+    .eq("cigar_name", cigarName).eq("brand", brandName);
+  if (logs && logs.length) {
+    var avg = logs.reduce(function(sum, r) { return sum + r.rating; }, 0) / logs.length;
+    clScore = Math.round(avg) + "/100 (" + logs.length + " review" + (logs.length === 1 ? "" : "s") + ")";
+  }
+
+  var caScore = v(cigar.ca_ranking, null);
+  var caPrice = v(cigar.price, family.price);
+
   var fields = [
-    ["Size",v(cigar.size,null)],["Shape",v(cigar.shape,null)],
-    ["Strength",v(cigar.strength,family.strength)],["Wrapper",v(cigar.wrapper_type,family.wrapper_type)],
-    ["Binder",v(cigar.binder,family.binder)],["Filler",v(cigar.filler,family.filler)],
-    ["Country",v(cigar.country,family.country)],["CA Score",v(cigar.ca_ranking,null)]
+    ["Size",     v(cigar.size, null)],
+    ["Shape",    v(cigar.shape, null)],
+    ["Strength", v(cigar.strength, family.strength)],
+    ["Wrapper",  v(cigar.wrapper_type, family.wrapper_type)],
+    ["Binder",   v(cigar.binder, family.binder)],
+    ["Filler",   v(cigar.filler, family.filler)],
+    ["Country",  v(cigar.country, family.country)],
+    ["CA Price", caPrice],
   ];
   var rows = "";
   fields.forEach(function(f) {
     if (f[1]) rows += "<div class='cigar-tile-row'><span class='cigar-tile-label'>" + f[0] + "</span><span class='cigar-tile-value'>" + f[1] + "</span></div>";
   });
+
   var subtitle = (familyName && familyName !== brandName) ? brandName + " &middot; " + familyName : brandName;
   var results = document.getElementById("searchResults");
   results.innerHTML = "";
-  var tile = document.createElement("div"); tile.className = "cigar-info-tile";
-  var tileHead = document.createElement("div"); tileHead.className = "cigar-tile-header";
-  var backBtn = document.createElement("button"); backBtn.className = "cigar-tile-back"; backBtn.textContent = "\u2190 Back";
+  var tile = document.createElement("div");
+  tile.className = "cigar-info-tile";
+
+  var tileHead = document.createElement("div");
+  tileHead.className = "cigar-tile-header";
+
+  var backBtn = document.createElement("button");
+  backBtn.className = "cigar-tile-back"; backBtn.textContent = "\u2190 Back";
   backBtn.onclick = function() { results.innerHTML = ""; document.getElementById("mainSearch").value = ""; };
-  var title = document.createElement("div"); title.className = "cigar-tile-title"; title.textContent = cigar.name;
-  var sub = document.createElement("div"); sub.className = "cigar-tile-subtitle"; sub.innerHTML = subtitle;
-  tileHead.appendChild(backBtn); tileHead.appendChild(title); tileHead.appendChild(sub);
-  var tileBody = document.createElement("div"); tileBody.className = "cigar-tile-body";
-  tileBody.innerHTML = rows || "<div style='color:var(--ash)'>No details available.</div>";
-  tile.appendChild(tileHead); tile.appendChild(tileBody);
+
+  var title = document.createElement("div");
+  title.className = "cigar-tile-title"; title.textContent = cigar.name;
+
+  var sub = document.createElement("div");
+  sub.className = "cigar-tile-subtitle"; sub.innerHTML = subtitle;
+
+  // Score badges in the header
+  var scores = document.createElement("div");
+  scores.style.cssText = "display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;";
+  scores.innerHTML =
+    "<div style='background:rgba(201,168,76,0.2);border:1px solid var(--gold);border-radius:8px;padding:4px 10px;font-size:0.78rem;'>" +
+      "<span style='color:var(--ash);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;'>Cigar Aficionado Score</span>" +
+      "<div style='color:var(--gold);font-weight:700;font-size:1rem;'>" + (caScore || "—") + "</div>" +
+    "</div>" +
+    "<div style='background:rgba(74,124,89,0.2);border:1px solid #4A7C59;border-radius:8px;padding:4px 10px;font-size:0.78rem;'>" +
+      "<span style='color:var(--ash);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;'>CigarLog Score</span>" +
+      "<div style='color:#4A7C59;font-weight:700;font-size:1rem;'>" + clScore + "</div>" +
+    "</div>";
+
+  tileHead.appendChild(backBtn);
+  tileHead.appendChild(title);
+  tileHead.appendChild(sub);
+  tileHead.appendChild(scores);
+
+  var tileBody = document.createElement("div");
+  tileBody.className = "cigar-tile-body";
+  tileBody.innerHTML = rows || "<div style='color:var(--ash);'>No details available.</div>";
+
+  tile.appendChild(tileHead);
+  tile.appendChild(tileBody);
   results.appendChild(tile);
 }
-
 
 // ── LOG SEARCH ────────────────────────────────────────────────────────────────
 function handleLogSearch(q) {
