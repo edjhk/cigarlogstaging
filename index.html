@@ -1196,7 +1196,9 @@ async function init() {
     return;
   }
   // Check session
+  console.log("checking session...");
   var session = localStorage.getItem('cl_session');
+  console.log("session value:", session);
   if (!session) { updateNav(); showPage('auth'); return; }
   var { data: profile } = await _supa.from('profiles').select().eq('username', session).single();
   if (!profile) { updateNav(); showPage('auth'); return; }
