@@ -308,11 +308,13 @@ var _feedChannel = null;
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 async function doLogin() {
-  var u = document.getElementById('loginUsername').value.trim().toLowerCase();
-  var p = document.getElementById('loginPassword').value;
-  var err = document.getElementById('loginError');
+  var u = document.getElementById('regUsername').value.trim().toLowerCase();
+  var p = document.getElementById('regPassword').value;
+  var inviteCode = document.getElementById('regInviteCode').value.trim();
+  var err = document.getElementById('regError');
   err.textContent = '';
-  if (!u || !p) { err.textContent = 'Username and password required.'; return; }
+  if (!inviteCode) { err.textContent = 'A valid invite link is required to register.'; return; }
+  if (!u || !p || !dn) { err.textContent = 'All fields required.'; return; }
   var btn = document.getElementById('loginBtn');
   btn.textContent = 'Signing in...'; btn.disabled = true;
   var { data, error } = await _supa.auth.signInWithPassword({ email: u + '@cigarlog.app', password: p });
@@ -333,7 +335,7 @@ function showAuthForm(which) {
 
 async function doRegister() {
   var u   = document.getElementById("regUsername").value.trim().toLowerCase();
-  var dn  = document.getElementById("regDisplayName").value.trim();
+  var dn  = u;
   var p   = document.getElementById("regPassword").value;
   var err = document.getElementById("regError");
   err.textContent = "";
@@ -1177,8 +1179,8 @@ async function init() {
   await loadCA();
   const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
   const inviteToken = hashParams.get('invite');
-if (inviteToken) {
-  const { data: inv } = await supa.from('invites').select().eq('token', inviteToken).single();
+  if (inviteToken) {
+    const { data: inv } = await supa.from('invites').select().eq('token', inviteToken).single();
   if (inv && !inv.used && new Date(inv.expires_at) > new Date()) {
     updateNav();
     showPage('auth');
