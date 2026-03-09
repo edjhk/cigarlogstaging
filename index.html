@@ -320,7 +320,7 @@ async function doLogin() {
   if (error) { err.textContent = error.message; btn.textContent = 'Sign In'; btn.disabled = false; return; }
   var { data: profile } = await _supa.from('profiles').select('*').eq('username', u).single();
   if (!profile) { err.textContent = 'Profile not found.'; btn.textContent = 'Sign In'; btn.disabled = false; return; }
-  currentUser = { supabaseId: profile.user_id, username: profile.username, displayName: profile.display_name, avatar: profile.avatar, isAdmin: profile.is_admin };
+  currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.display_name, avatar: profile.avatar, isAdmin: profile.is_admin };
   localStorage.setItem('cl_session', u);
   btn.textContent = 'Sign In'; btn.disabled = false;
   updateNav();
@@ -1150,7 +1150,7 @@ async function init() {
   if (!session) { updateNav(); showPage('auth'); return; }
   var { data: profile } = await _supa.from('profiles').select().eq('username', session).single();
   if (!profile) { updateNav(); showPage('auth'); return; }
-  currentUser = { supabaseId: profile.user_id, username: profile.username, displayName: profile.display_name, avatar: profile.avatar, isAdmin: profile.is_admin };
+  currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.display_name, avatar: profile.avatar, isAdmin: profile.is_admin };
   updateNav();
   showPage('dashboard');
 
