@@ -1177,21 +1177,27 @@ function showToast(msg) {
 async function init() {
   await loadCA();
 
-  const hashParams = new URLSearchParams(window.location.hash.replace('#',''));
+  const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
   const inviteToken = hashParams.get('invite');
   if (inviteToken) {
     const { data: inv } = await _supa.from('invites').select().eq('token', inviteToken).single();
-    if (inv && !inv.used && new Date(inv.expires_at) > new Date()) {
+  if (inv && !inv.used && new Date(inv.expires_at) > new Date()) {
     updateNav();
     showPage('auth');
-  // Small delay ensures showPage finishes rendering before we manipulate forms
     setTimeout(() => {
       document.getElementById('form-register').classList.remove('hidden');
       document.getElementById('form-login').classList.add('hidden');
       document.getElementById('regInviteCode').value = inviteToken;
-    showToast("🎉 You've been invited! Create your account below.");
-  }, 50);
+      showToast("🎉 You've been invited! Create your account below.");
+    }, 50);
+  } else {
+    updateNav();
+    showPage('auth');
+    showToast('This invite link is invalid or has already been used.');
+  }
+  return;
 }
+
 
 
   // Check session
