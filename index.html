@@ -1194,10 +1194,6 @@ async function init() {
     }
     return;
   }
-
-  // ... rest of your init continues here ...
-}
-
   // Check session
   var session = localStorage.getItem('cl_session');
   if (!session) { updateNav(); showPage('auth'); return; }
@@ -1206,24 +1202,8 @@ async function init() {
   currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.display_name, avatar: profile.avatar, isAdmin: profile.is_admin };
   updateNav();
   showPage('dashboard');
-
-  var ff = document.getElementById("sidebarFeedFile");
-  var fc = document.getElementById("sidebarFeedCam");
-  var lp = document.getElementById("logPhoto");
-  var lc = document.getElementById("logPhotoCamera");
-  if (ff) ff.onchange = function() { postSidebarMedia(this); };
-  if (fc) fc.onchange = function() { postSidebarMedia(this); };
-  if (lp) lp.onchange = function() { previewLogPhoto(this); };
-  if (lc) lc.onchange = function() { previewLogPhoto(this); };
-
-  window.addEventListener('popstate', function(e) {
-    if (e.state && e.state.page) { showPage(e.state.page); }
-    else { showPage('dashboard'); }
-  });
 }
-
 init();
-
 </script>
 </body>
 </html>
