@@ -987,7 +987,7 @@ async function generateInvite() {
     expires_at: expires_at
   });
   if (error) { showToast('Error: ' + error.message); return; }
-  var link = 'https://edjhk.gihub.io/cigarlog/#invite=' + token;
+  var link = 'https://edjhk.github.io/cigarlog/#invite=' + token;
   document.getElementById('inviteLinkText').textContent = link;
   document.getElementById('inviteResult').style.display = 'block';
   renderInviteList();
