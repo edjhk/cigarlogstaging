@@ -24,7 +24,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
 .nav-btn:hover{background:var(--tobacco);color:white;}
 .nav-btn.btn-primary{background:var(--ember);color:white;border-color:var(--ember);}
 .user-pill { display:flex; align-items:center; gap:8px; background:rgba(248,244,237,0.15); border:1px solid rgba(201,168,76,0.5); border-radius:50px; padding:6px 14px 6px 8px; cursor:pointer; position:relative; }
-.user-avatar-sm{width:30px;height:30px;border-radius:50%;background:var(--tobacco);
+.user-avatar-sm{width:30px;height:30px;border-radius:50%;background:rgba(139,94,60,0.4);
   display:flex;align-items:center;justify-content:center;font-size:1rem;}
 .dash-layout{display:grid;grid-template-columns:1fr 380px;gap:24px;padding:32px 20px;max-width:1600px;margin:0 auto;}
 @media(max-width:1100px){.dash-layout{grid-template-columns:1fr;}.dash-sidebar{position:static;height:auto;}}
@@ -732,14 +732,15 @@ async function selectCigar(brandName, familyName, cigarName) {
   var scores = document.createElement("div");
   scores.style.cssText = "display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;";
 scores.innerHTML =
-  "<div style='background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:4px 10px;font-size:0.78rem;'>" +
-    "<span style='color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;'>Cigar Aficionado Score</span>" +
-    "<div style='color:var(--gold);font-weight:700;font-size:1rem;'>" + (caScore || "—") + "</div>" +
+  "<div style='background:rgba(0,0,0,0.3);border:1px solid rgba(201,168,76,0.6);border-radius:8px;padding:6px 12px;'>" +
+    "<div style='color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;'>Cigar Aficionado Score</div>" +
+    "<div style='color:var(--gold);font-weight:700;font-size:1.1rem;'>" + (caScore || "—") + "</div>" +
   "</div>" +
-  "<div style='background:rgba(74,124,89,0.12);border:1px solid rgba(74,124,89,0.4);border-radius:8px;padding:4px 10px;font-size:0.78rem;'>" +
-    "<span style='color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;'>CigarLog Score</span>" +
-    "<div style='color:#6dbf85;font-weight:700;font-size:1rem;'>" + clScore + "</div>" +
+  "<div style='background:rgba(0,0,0,0.3);border:1px solid rgba(74,124,89,0.6);border-radius:8px;padding:6px 12px;'>" +
+    "<div style='color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;'>CigarLog Score</div>" +
+    "<div style='color:#7dd99a;font-weight:700;font-size:1.1rem;'>" + clScore + "</div>" +
   "</div>";
+
 
 
   tileHead.appendChild(backBtn);
