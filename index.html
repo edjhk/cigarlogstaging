@@ -1173,7 +1173,8 @@ function showToast(msg) {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
   await loadCA();
-
+  console.log("init started, caDatabase length:", caDatabase ? caDatabase.length : "null");
+  
   const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
   const inviteToken = hashParams.get('invite');
   if (inviteToken) {
