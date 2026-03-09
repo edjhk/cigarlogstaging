@@ -315,7 +315,9 @@ async function doLogin() {
   btn.textContent = 'Signing in...'; btn.disabled = true;
   var { data, error } = await _supa.auth.signInWithPassword({ email: u + '@cigarlog.app', password: p });
   if (error) { err.textContent = error.message; btn.textContent = 'Sign In'; btn.disabled = false; return; }
-  var { data: profile } = await _supa.from('profiles').select('*').eq('username', u).single();
+  var { data: profile } = await _supa.from('profiles').select().eq('username', session).single();
+  console.log("profile:", profile);
+
   if (!profile) { err.textContent = 'Profile not found.'; btn.textContent = 'Sign In'; btn.disabled = false; return; }
   currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.display_name, avatar: profile.avatar, isAdmin: profile.is_admin };
   localStorage.setItem('cl_session', u);
