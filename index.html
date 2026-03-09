@@ -533,7 +533,10 @@ async function renderDashboard() {
       + (meta    ? "<div style='font-size:0.75rem;color:var(--ash);margin-top:6px;'>" + meta + "</div>" : "")
       + "</div>";
   }).join("");
+  console.log("grid innerHTML length:", grid.innerHTML.length);
+  grid.style.background = "red";
 }
+
 
 // ── LOG A SMOKE ───────────────────────────────────────────────────────────────
 function openLogSmoke() {
