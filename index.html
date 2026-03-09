@@ -723,10 +723,13 @@ async function selectCigar(brandName, familyName, cigarName) {
   backBtn.onclick = function() { results.innerHTML = ""; document.getElementById("mainSearch").value = ""; };
 
   var title = document.createElement("div");
-  title.className = "cigar-tile-title"; title.textContent = cigar.name;
+  title.style.cssText = "font-family:'Playfair Display',serif;font-size:0.85rem;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;";
+  title.innerHTML = subtitle;
 
   var sub = document.createElement("div");
-  sub.className = "cigar-tile-subtitle"; sub.innerHTML = subtitle;
+  sub.style.cssText = "font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--gold);margin-top:3px;";
+  sub.textContent = cigar.name;
+
 
   // Score badges in the header
   var scores = document.createElement("div");
