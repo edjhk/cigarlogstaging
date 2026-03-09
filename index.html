@@ -1,3 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CigarLog</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+/* Your CSS unchanged - kept as-is */
+:root {
+  --cream:#F8F4ED; --warm-white:#FDFAF6; --tobacco:#8B5E3C; --dark-tobacco:#5C3D1E;
+  --ember:#D4622A; --ember-light:#F08050; --gold:#C9A84C; --gold-light:#E8C97A;
+  --charcoal:#2C2418; --ash:#B8A898; --light-ash:#D8CCBF; --band-red:#8B1A1A;
+  --success:#4A7C59; --shadow:rgba(44,36,24,0.15); --radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal);min-height:100vh;}
+.page{display:none;} .page.active{display:block;} .hidden{display:none!important;}
+.nav{background:var(--charcoal);padding:0 20px;height:64px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(44,36,24,0.3);}
+.nav-logo{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.5rem;font-weight:700;cursor:pointer;}
+.nav-btn{background:none;border:1px solid rgba(201,168,76,0.3);color:#F8F4ED;padding:6px 12px;
+  border-radius:50px;cursor:pointer;font-size:0.82rem;transition:all 0.2s;font-family:'Lato',sans-serif;font-weight:600;}
+.nav-btn:hover{background:var(--tobacco);color:white;}
+.nav-btn.btn-primary{background:var(--ember);color:white;border-color:var(--ember);}
+.user-pill { display:flex; align-items:center; gap:8px; background:rgba(248,244,237,0.15); border:1px solid rgba(201,168,76,0.5); border-radius:50px; padding:6px 14px 6px 8px; cursor:pointer; position:relative; }
+.user-avatar-sm{width:30px;height:30px;border-radius:50%;background:var(--tobacco);
+  display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.dash-layout{display:grid;grid-template-columns:1fr 380px;gap:24px;padding:32px 20px;max-width:1600px;margin:0 auto;}
+@media(max-width:1100px){.dash-layout{grid-template-columns:1fr;}.dash-sidebar{position:static;height:auto;}}
+.dash-main{min-width:0;}
+.dash-sidebar{position:sticky;top:84px;height:calc(100vh - 104px);display:flex;flex-direction:column;}
+.btn{padding:12px 24px;border-radius:var(--radius);border:none;font-family:'Lato',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
+.btn-primary{background:var(--ember);color:white;} .btn-primary:hover{background:var(--ember-light);}
+.btn-secondary{background:var(--tobacco);color:white;} .btn-secondary:hover{opacity:0.9;}
+.btn-gold{background:var(--gold);color:var(--charcoal);} .btn-gold:hover{background:var(--gold-light);}
+.form-group{margin-bottom:20px;}
+.form-label{display:block;font-size:0.85rem;font-weight:700;color:var(--dark-tobacco);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
+.form-input,.form-textarea{width:100%;padding:12px 14px;border:1.5px solid var(--light-ash);
+  border-radius:12px;font-family:'Lato',sans-serif;font-size:0.9rem;background:white;transition:border 0.2s;}
+.form-input:focus,.form-textarea:focus{outline:none;border-color:var(--tobacco);}
+.auth-card{background:white;border-radius:20px;padding:40px;box-shadow:0 4px 30px var(--shadow);max-width:440px;margin:80px auto;}
+.auth-title{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--dark-tobacco);margin-bottom:8px;}
+.auth-sub{color:var(--ash);margin-bottom:24px;font-size:0.9rem;}
+.auth-toggle{margin-top:16px;text-align:center;font-size:0.85rem;color:var(--ash);}
+.auth-toggle a{color:var(--tobacco);cursor:pointer;font-weight:700;}
+.cigars-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:24px;}
+.cigar-card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 3px 15px var(--shadow);cursor:pointer;transition:transform 0.2s;}
+.cigar-card:hover{transform:translateY(-4px);}
+.search-brand-header{font-family:'Playfair Display',serif;font-weight:700;font-size:0.82rem;
+  text-transform:uppercase;letter-spacing:0.06em;color:var(--dark-tobacco);
+  padding:8px 14px 3px;margin-top:6px;border-top:1px solid var(--light-ash);}
+.search-brand-header:first-child{border-top:none;margin-top:0;}
+.search-result-family{padding:5px 14px 5px 24px;cursor:pointer;border-radius:6px;font-size:0.92rem;color:var(--charcoal);transition:background 0.15s;}
+.search-result-family:hover{background:var(--light-ash);}
+.search-result-cigar{padding:6px 14px 6px 34px;cursor:pointer;border-radius:6px;font-size:0.86rem;color:var(--tobacco);transition:background 0.15s;}
+.search-result-cigar:hover{background:var(--cream);}
+.cigar-info-tile{background:white;border-radius:16px;box-shadow:0 4px 24px var(--shadow);overflow:hidden;max-width:480px;margin-top:8px;}
+.cigar-tile-header{background:linear-gradient(135deg,var(--dark-tobacco),var(--charcoal));padding:20px;color:white;}
+.cigar-tile-back{background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);
+  padding:5px 12px;border-radius:20px;cursor:pointer;font-size:0.8rem;margin-bottom:10px;display:inline-block;font-family:'Lato',sans-serif;}
+.cigar-tile-back:hover{background:rgba(255,255,255,0.12);color:white;}
+.cigar-tile-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--gold);margin-top:4px;}
+.cigar-tile-subtitle{font-size:0.8rem;color:rgba(255,255,255,0.55);margin-top:4px;}
+.cigar-tile-body{padding:16px 20px;}
+.cigar-tile-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--light-ash);}
+.cigar-tile-row:last-child{border-bottom:none;}
+.cigar-tile-label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--ash);}
+.cigar-tile-value{font-size:0.92rem;color:var(--charcoal);font-weight:500;text-align:right;max-width:60%;}
+.admin-section{background:white;border-radius:16px;padding:24px;margin-top:24px;box-shadow:0 3px 15px var(--shadow);}
+.admin-item{padding:12px;border-bottom:1px solid var(--light-ash);display:flex;justify-content:space-between;align-items:center;}
+.admin-item:last-child{border-bottom:none;}
+.admin-btn{background:var(--band-red);color:white;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:0.85rem;}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:white;
+  padding:12px 24px;border-radius:30px;font-size:0.92rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);opacity:0;transition:opacity 0.3s;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Ensure supabase library is available before any code runs
+window._supaReady = false;
+</script>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <div style="display:flex;align-items:center;gap:6px;">
+    <div class="nav-logo" onclick="showPage('dashboard')">CigarLog</div>
+    <div id="navLinks" style="display:flex;gap:4px;align-items:center;margin-left:12px;"></div>
+  </div>
+  <div id="navActions" style="display:flex;align-items:center;gap:8px;position:relative;"></div>
+</div>
+
+<!-- AUTH -->
+<div id="page-auth" class="page">
+  <div class="auth-card">
+
+    <!-- Login Form -->
+    <div id="form-login">
+      <h2 class="auth-title">Welcome back.</h2>
+      <p class="auth-sub">Sign in to your smoke journal</p>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-input" id="loginUsername" placeholder="yourhandle">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="loginPassword" placeholder="">
+      </div>
+      <button id="loginBtn" class="btn btn-primary" onclick="doLogin()" style="width:100%">Sign In</button>
+      <div id="loginError" style="font-size:0.82rem;margin-top:10px;text-align:center;color:var(--band-red)"></div>
+      <div class="auth-toggle">New here? <a onclick="showAuthForm('register')">Create account &rarr;</a></div>
+    </div>
+
+    <!-- Register Form -->
+    <div id="form-register" class="hidden">
+      <h2 class="auth-title">Join the club.</h2>
+      <p class="auth-sub">Start your personal smoke journal</p>
+      <div class="form-group"><label class="form-label">Username</label>
+        <input type="text" class="form-input" id="regUsername" placeholder="yourhandle"></div>
+      <div class="form-group"><label class="form-label">Display Name</label>
+        <input type="text" class="form-input" id="regDisplayName" placeholder="Your Name"></div>
+      <div class="form-group"><label class="form-label">Email</label>
+        <input type="email" class="form-input" id="regEmail" placeholder="your@email.com"></div>
+      <div class="form-group"><label class="form-label">Password</label>
+        <input type="password" class="form-input" id="regPassword" placeholder=""></div>
+      <div class="form-group"><label class="form-label">Invite Code (optional)</label>
+        <input type="text" class="form-input" id="regInviteCode" placeholder="Leave blank if first user"></div>
+      <button id="regBtn" class="btn btn-primary" onclick="doRegister()" style="width:100%">Create Account</button>
+      <div id="regError" style="font-size:0.82rem;margin-top:10px;text-align:center;color:var(--band-red)"></div>
+      <div class="auth-toggle">Already a member? <a onclick="showAuthForm('login')">Sign in &rarr;</a></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page">
+  <div class="dash-layout">
+    <div class="dash-main">
+      <div style="background:white;border-radius:16px;box-shadow:0 4px 20px var(--shadow);padding:18px 20px;margin-bottom:24px;">
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--dark-tobacco);margin-bottom:10px;">Cigar Buying Guide</div>
+        <div style="display:flex;align-items:center;background:var(--cream);border:2px solid var(--light-ash);border-radius:12px;padding:10px 16px;">
+          <input type="text" id="mainSearch" placeholder="Search brand, family or vitola..."
+            oninput="handleSearchInput(this.value)"
+            style="flex:1;border:none;background:none;outline:none;font-family:'Lato',sans-serif;font-size:1rem;color:var(--charcoal);">
+        </div>
+      </div>
+      <div id="searchResults" style="margin-bottom:16px;"></div>
+      <div class="cigars-grid" id="cigarsGrid"></div>
+    </div>
+    <div class="dash-sidebar">
+      <div style="display:flex;flex-direction:column;height:100%;background:white;border-radius:16px;box-shadow:0 3px 15px var(--shadow);overflow:hidden;">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--light-ash);font-family:'Playfair Display',serif;font-weight:700;font-size:0.95rem;color:var(--dark-tobacco);">Messages</div>
+        <div id="sidebarFeedPosts" style="flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:6px;"></div>
+        <div style="padding:8px 10px;border-top:1px solid var(--light-ash);display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <div style="flex:1;display:flex;align-items:center;background:var(--cream);border:1.5px solid var(--light-ash);border-radius:20px;padding:6px 12px;gap:6px;">
+            <input id="sidebarFeedInput" type="text" placeholder="Message..."
+              style="flex:1;background:none;border:none;outline:none;color:var(--charcoal);font-size:0.88rem;font-family:'Lato',sans-serif;"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();postSidebarFeed();}">
+            <label for="sidebarFeedFile" style="cursor:pointer;font-size:1.1rem;" title="Attach">&#128206;</label>
+            <input id="sidebarFeedFile" type="file" accept="image/*" style="display:none;">
+            <label for="sidebarFeedCam" style="cursor:pointer;font-size:1.1rem;" title="Camera">&#128247;</label>
+            <input id="sidebarFeedCam" type="file" accept="image/*" capture="environment" style="display:none;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div id="page-detail" class="page">
+  <div style="max-width:1000px;margin:0 auto;padding:40px 20px;">
+    <button class="btn btn-secondary" onclick="event.stopPropagation();showPage('dashboard');" style="margin-bottom:24px;">&larr; Back</button>
+    <div id="detailContent"></div>
+  </div>
+</div>
+
+<!-- LOG A SMOKE -->
+<div id="page-log" class="page">
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <button class="btn btn-secondary" onclick="event.stopPropagation();showPage('dashboard');" style="margin-bottom:24px;">&larr; Back</button>    <div style="background:white;border-radius:20px;padding:32px;box-shadow:0 4px 30px var(--shadow);">
+      <h2 style="font-family:'Playfair Display',serif;color:var(--dark-tobacco);margin-bottom:24px;">Log a Smoke</h2>
+      <div class="form-group">
+        <label class="form-label">Cigar</label>
+        <input type="text" class="form-input" id="logCigarSearch" placeholder="Search brand or family..." autocomplete="off" oninput="handleLogSearch(this.value)">
+        <div id="logSearchResults" style="margin-top:8px;background:white;border-radius:10px;box-shadow:0 2px 10px var(--shadow);"></div>
+        <div id="logSelectedCigar" style="display:none;margin-top:10px;padding:10px 14px;background:var(--cream);border-radius:10px;font-size:0.9rem;">
+          <strong id="logSelectedName"></strong>
+          <span id="logSelectedMeta" style="color:var(--ash);margin-left:8px;font-size:0.82rem;"></span>
+          <button onclick="clearLogCigar()" style="float:right;background:none;border:none;color:var(--ash);cursor:pointer;">&#10005;</button>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Your Rating (1-100)</label>
+        <input type="number" class="form-input" id="logRating" min="1" max="100" placeholder="e.g. 92"></div>
+      <div class="form-group"><label class="form-label">Price Paid ($)</label>
+        <input type="number" class="form-input" id="logPrice" min="0" step="0.01" placeholder="e.g. 18.50"></div>
+      <div class="form-group"><label class="form-label">Where Smoked</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" class="form-input" id="logLocation" placeholder="e.g. Back porch..." style="flex:1;">
+          <button type="button" onclick="useMyLocation()" style="background:var(--cream);border:1.5px solid var(--light-ash);border-radius:12px;padding:10px 12px;cursor:pointer;font-size:1.1rem;" title="Use my location">&#128205;</button>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Tasting Notes</label>
+        <textarea class="form-textarea" id="logNotes" rows="4" placeholder="Flavors, draw, burn, overall impression..."></textarea></div>
+      <div class="form-group"><label class="form-label">Photo</label>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <label for="logPhoto" style="cursor:pointer;background:var(--cream);border:1.5px solid var(--light-ash);border-radius:12px;padding:10px 16px;font-size:0.88rem;color:var(--tobacco);font-weight:700;">&#128444; Gallery</label>
+          <input type="file" id="logPhoto" accept="image/*" style="display:none;">
+          <label for="logPhotoCamera" style="cursor:pointer;background:var(--cream);border:1.5px solid var(--light-ash);border-radius:12px;padding:10px 16px;font-size:0.88rem;color:var(--tobacco);font-weight:700;">&#128247; Camera</label>
+          <input type="file" id="logPhotoCamera" accept="image/*" capture="environment" style="display:none;">
+          <span id="logPhotoName" style="font-size:0.8rem;color:var(--ash);"></span>
+        </div>
+        <img id="logPhotoPreview" src="" style="display:none;margin-top:8px;max-width:100%;border-radius:10px;max-height:200px;object-fit:cover;">
+      </div>
+      <div class="form-group"><label class="form-label">Date Smoked</label>
+        <input type="date" class="form-input" id="logDate"></div>
+      <button class="btn btn-primary" id="logSaveBtn" style="width:100%;margin-top:8px;" onclick="submitLog()">Save to Journal</button>
+      <div id="logError" style="color:var(--band-red);font-size:0.82rem;margin-top:10px;text-align:center;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGES PAGE -->
+<div id="page-messages" class="page">
+  <div style="max-width:700px;margin:0 auto;padding:40px 20px;">
+    <button class="btn btn-secondary" onclick="event.stopPropagation();showPage('dashboard');" style="margin-bottom:24px;">&larr; Back</button>    <div style="background:white;border-radius:20px;padding:28px;box-shadow:0 4px 30px var(--shadow);">
+      <h2 style="font-family:'Playfair Display',serif;color:var(--dark-tobacco);margin-bottom:20px;">Community Feed</h2>
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <input type="text" id="feedInput" class="form-input" placeholder="Share a smoke, a thought..." style="flex:1;">
+        <button class="btn btn-primary" onclick="postToFeed()">Post</button>
+      </div>
+      <div id="feedPosts"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENTS -->
+<div id="page-events" class="page">
+  <div style="max-width:700px;margin:0 auto;padding:40px 20px;">
+    <button class="btn btn-secondary" onclick="event.stopPropagation();showPage('dashboard');" style="margin-bottom:24px;">&larr; Back</button>    <div style="background:white;border-radius:20px;padding:28px;box-shadow:0 4px 30px var(--shadow);">
+      <h2 style="font-family:'Playfair Display',serif;color:var(--dark-tobacco);">Events</h2>
+      <p style="color:var(--ash);margin-top:12px;">Coming soon — plan smokes with friends.</p>
+    </div>
+  </div>
+</div>
+
+<!-- INVITE -->
+<div id="page-invite" class="page">
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <button class="btn btn-secondary" onclick="event.stopPropagation();showPage('dashboard');" style="margin-bottom:24px;">&larr; Back</button>    <div style="background:white;border-radius:20px;padding:32px;box-shadow:0 4px 30px var(--shadow);">
+      <h2 style="font-family:'Playfair Display',serif;color:var(--dark-tobacco);margin-bottom:8px;">Invite a Friend</h2>
+      <p style="color:var(--ash);font-size:0.9rem;margin-bottom:24px;">Generate a one-time invite link.</p>
+      <div class="form-group"><label class="form-label">Friend's Name (optional)</label>
+        <input type="text" class="form-input" id="inviteName" placeholder="e.g. Mike"></div>
+      <button class="btn btn-primary" style="width:100%;" onclick="generateInvite()">Generate Invite Link</button>
+      <div id="inviteResult" style="margin-top:20px;display:none;">
+        <div style="background:var(--cream);border-radius:12px;padding:16px;word-break:break-all;">
+          <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;color:var(--ash);margin-bottom:6px;">Your Invite Link</div>
+          <div id="inviteLinkText" style="font-size:0.88rem;color:var(--dark-tobacco);"></div>
+        </div>
+        <button class="btn btn-gold" style="width:100%;margin-top:12px;" onclick="copyInviteLink()">Copy Link</button>
+      </div>
+      <div style="margin-top:28px;border-top:1px solid var(--light-ash);padding-top:20px;">
+        <h3 style="font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:12px;">Sent Invites</h3>
+        <div id="inviteList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="page-settings" class="page">
+  <div style="max-width:1000px;margin:0 auto;padding:40px 20px;">
+    <button class="btn btn-secondary" onclick="event.stopPropagation();showPage('dashboard');" style="margin-bottom:24px;">← Back</button>
+    <h2 style="font-family:'Playfair Display',serif;margin-bottom:24px;">Settings</h2>
+    <div class="admin-section" id="adminPanel" style="display:none;">
+      <h3 style="margin-bottom:16px;">Admin Panel</h3>
+      <div style="display:flex;gap:8px;margin-bottom:20px;">
+        <button class="btn btn-secondary" id="adminTabUsers" onclick="switchAdminTab('users')" style="padding:6px 18px;font-size:0.85rem;">👤 Users</button>
+        <button class="btn btn-secondary" id="adminTabMessages" onclick="switchAdminTab('messages')" style="padding:6px 18px;font-size:0.85rem;">💬 Messages</button>
+      </div>
+      <div id="adminUsers"></div>
+      <div id="adminFeed" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+
+<div id="toast-el" class="toast"></div>
+
+<script>
+var supa;
+function initSupa() {
+  if (supa) return supa;
+  supa = supabase.createClient(
+    "https://flrqhivvjimahfrdoxwt.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZscnFoaXZ2amltYWhmcmRveHd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODkyNzUsImV4cCI6MjA4ODQ2NTI3NX0.3PoCVkRGM3fLyu0MXsaz4ZKH1zsuo_HVcKUZpciOAAk"
+  );
+  return supa;
+}
+var _supa = initSupa();
+var currentUser = null;
+var caDatabase  = [];
+var logSelectedCigar = null;
+var _feedChannel = null;
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+async function doLogin() {
+  var u = document.getElementById('loginUsername').value.trim().toLowerCase();
+  var p = document.getElementById('loginPassword').value;
+  var err = document.getElementById('loginError');
+  err.textContent = '';
+  if (!u || !p) { err.textContent = 'Username and password required.'; return; }
+  var btn = document.getElementById('loginBtn');
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+  var { data, error } = await _supa.auth.signInWithPassword({ email: u + '@cigarlog.app', password: p });
+  if (error) { err.textContent = error.message; btn.textContent = 'Sign In'; btn.disabled = false; return; }
+  var { data: profile } = await _supa.from('profiles').select('*').eq('username', u).single();
+  if (!profile) { err.textContent = 'Profile not found.'; btn.textContent = 'Sign In'; btn.disabled = false; return; }
+  currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.display_name, avatar: profile.avatar, isAdmin: profile.is_admin };
+  localStorage.setItem('cl_session', u);
+  btn.textContent = 'Sign In'; btn.disabled = false;
+  updateNav();
+  showPage('dashboard');
+}
+
+function showAuthForm(which) {
+  document.getElementById("form-login").classList.toggle("hidden", which !== "login");
+  document.getElementById("form-register").classList.toggle("hidden", which !== "register");
+}
+
+async function doRegister() {
+  var u   = document.getElementById("regUsername").value.trim().toLowerCase();
+  var dn  = document.getElementById("regDisplayName").value.trim();
+  var p   = document.getElementById("regPassword").value;
+  var err = document.getElementById("regError");
+  err.textContent = "";
+  if (!u || !p || !dn) { err.textContent = "All fields required."; return; }
+  if (p.length < 6)    { err.textContent = "Password must be 6+ characters."; return; }
+  var btn = document.getElementById("regBtn");
+  btn.textContent = "Creating..."; btn.disabled = true;
+  var result = await _supa.auth.signUp({ email: u + "@cigarlog.app", password: p });
+  if (result.error) { err.textContent = result.error.message; btn.textContent = "Create Account"; btn.disabled = false; return; }
+  await _supa.from("profiles").insert({ user_id: result.data.user.id, username: u, display_name: dn, avatar: "", is_admin: false });
+  // Mark invite as used if one was provided
+  const usedToken = document.getElementById('regInviteCode').value.trim();
+  if (usedToken) {
+    await _supa.from('invites')
+      .update({ used: true, accepted_by: result.data.user.id })
+      .eq('token', usedToken);
+  }
+  localStorage.setItem("cl_session", u);
+  btn.textContent = "Create Account"; btn.disabled = false;
+  location.reload();
+}
+
+function doLogout() {
+  localStorage.removeItem("cl_session");
+  currentUser = null;
+  if (_feedChannel) { _supa.removeChannel(_feedChannel); _feedChannel = null; }
+  updateNav();
+  showPage("auth");
+}
+
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function toggleUserMenu() {
+  var d = document.getElementById("userDropdown");
+  if (d) d.style.display = d.style.display === "none" ? "block" : "none";
+}
+function closeUserMenu() {
+  var d = document.getElementById("userDropdown");
+  if (d) d.style.display = "none";
+}
+document.addEventListener("click", function(e) {
+  if (e.target && !e.target.closest(".user-pill")) closeUserMenu();
+});
+
+function updateNav() {
+  var nav   = document.getElementById("navActions");
+  var links = document.getElementById("navLinks");
+  if (!currentUser) {
+    if (links) links.innerHTML = "";
+    nav.innerHTML = "";
+    var b1 = document.createElement("button");
+    b1.className = "nav-btn"; b1.textContent = "Sign In";
+    b1.onclick = function() { showPage("auth"); };
+    var b2 = document.createElement("button");
+    b2.className = "nav-btn btn-primary"; b2.textContent = "Join";
+    b2.onclick = function() { showAuthForm("register"); };
+    nav.appendChild(b1); nav.appendChild(b2);
+    return;
+  }
+  if (links) {
+    links.innerHTML = "";
+    var btns = [
+      { label: "🚬 Log a Smoke", fn: function() { openLogSmoke(); } },
+      { label: "Messages", fn: function() { showPage("messages"); } },
+      { label: "Events",   fn: function() { showPage("events"); } },
+      { label: "Invite",   fn: function() { showPage("invite"); } },
+    ];
+    btns.forEach(function(b) {
+      var el = document.createElement("button");
+      el.className = "nav-btn"; el.textContent = b.label;
+      el.style.cssText = "padding:6px 12px;";
+      if (b.label === "🚬 Log a Smoke") { el.classList.add("btn-primary"); el.style.cssText = "padding:6px 16px;font-size:0.9rem;"; }
+      el.onclick = b.fn;
+      links.appendChild(el);
+    });
+    var rev = document.createElement("button");
+    rev.id = "navReviewsBtn"; rev.className = "nav-btn";
+    rev.style.cssText = "padding:6px 12px;background:rgba(201,168,76,0.15);border-color:var(--gold);color:var(--gold);";
+    rev.textContent = "0 Reviews";
+    rev.onclick = function() { showPage("dashboard"); };
+    links.appendChild(rev);
+  }
+  nav.innerHTML = "";
+  var pill = document.createElement("div");
+  pill.className = "user-pill";
+  pill.onclick = toggleUserMenu;
+  pill.innerHTML = "<div class='user-avatar-sm'>" + (currentUser.avatar || "") + "</div><span>" + currentUser.displayName + "</span><span style='font-size:0.7rem;margin-left:4px;color:var(--ash);'>&#9660;</span>";
+  var drop = document.createElement("div");
+  drop.id = "userDropdown";
+  drop.style.cssText = "display:none;position:absolute;top:44px;right:0;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);min-width:160px;z-index:200;overflow:hidden;";
+  if (currentUser.isAdmin) {
+    var adm = document.createElement("div");
+    adm.style.cssText = "padding:12px 16px;cursor:pointer;font-size:0.9rem;border-bottom:1px solid var(--light-ash);";
+    adm.textContent = "Admin";
+    adm.onclick = function() { closeUserMenu(); showPage("settings"); };
+    drop.appendChild(adm);
+  }
+  var out = document.createElement("div");
+  out.style.cssText = "padding:12px 16px;cursor:pointer;font-size:0.9rem;color:var(--band-red);";
+  out.textContent = "Sign Out";
+  out.onclick = doLogout;
+  drop.appendChild(out);
+  pill.appendChild(drop);
+  nav.appendChild(pill);
+}
+
+
+function navGo(page) {
+  closeUserMenu();
+  if (page === "auth")     { showPage("auth"); return; }
+  if (page === "register") { showAuthForm("register"); showPage("auth"); return; }
+  showPage(page);
+}
+
+
+// ── PAGES ─────────────────────────────────────────────────────────────────────
+function showPage(page) {
+  document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
+  var t = document.getElementById("page-" + page);
+  if (!t) { console.warn("showPage: no element found for page-" + page); return; }
+  t.classList.add("active");
+  history.pushState({ page: page }, '', '#' + page);
+  if (page === "dashboard")  { renderDashboard(); renderSidebarFeed(); if (!_feedChannel) subscribeToFeed(); }
+  if (page === "messages")   { renderFeed(); }
+  if (page === "invite")     { renderInviteList(); }
+  if (page === "settings" && currentUser && currentUser.isAdmin) renderAdminPanel();
+  window.scrollTo(0, 0);
+}
+
+// ── CIGAR JSON ────────────────────────────────────────────────────────────────
+async function loadCA() {
+  try {
+    var r = await fetch("cigar_brands.json");
+    if (r.ok) { var d = await r.json(); caDatabase = d.brands || []; }
+  } catch(e) { console.warn("cigar_brands.json:", e); }
+}
+
+// ── PHOTO UPLOAD ──────────────────────────────────────────────────────────────
+function compressImage(file, maxPx, quality) {
+  return new Promise(function(resolve) {
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var img = new Image();
+      img.onload = function() {
+        var w = img.width, h = img.height;
+        if (w > maxPx || h > maxPx) {
+          if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+          else { w = Math.round(w * maxPx / h); h = maxPx; }
+        }
+        var c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        c.toBlob(function(b) { resolve(b); }, "image/jpeg", quality || 0.82);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadPhoto(file, folder) {
+  var blob = await compressImage(file, 1200, 0.82);
+  var path = (folder || "feed") + "/" + Date.now() + "_" + Math.random().toString(36).slice(2) + ".jpg";
+  var { error } = await _supa.storage.from("photos").upload(path, blob, { contentType: "image/jpeg" });
+  if (error) { console.error("Upload:", error.message); return null; }
+  return _supa.storage.from("photos").getPublicUrl(path).data.publicUrl;
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+async function renderDashboard() {
+  if (!currentUser || !currentUser.supabaseId) return;
+  var { data: mine } = await _supa.from("cigar_logs").select("*")
+    .eq("user_id", currentUser.supabaseId).order("date_smoked", { ascending: false });
+  mine = mine || [];
+  var btn = document.getElementById("navReviewsBtn");
+  if (btn) btn.textContent = mine.length + " " + (mine.length === 1 ? "Review" : "Reviews");
+  var grid = document.getElementById("cigarsGrid"); if (!grid) return;
+  if (!mine.length) {
+    grid.innerHTML = "<div style='text-align:center;padding:60px 20px;color:var(--ash);'><h3>Welcome! Log your first smoke.</h3></div>";
+    return;
+  }
+  grid.innerHTML = mine.map(function(e) {
+    var stars = e.rating ? e.rating + "/100" : "";
+    var price = e.price  ? "$" + parseFloat(e.price).toFixed(2) : "";
+    var meta  = [price, e.location].filter(Boolean).join(" · ");
+    var fam   = (e.family && e.family !== e.brand) ? e.brand + " · " + e.family : (e.brand || "");
+    return "<div class='cigar-card' style='padding:18px 20px;'>"
+      + (e.photo_url ? "<img src='" + e.photo_url + "' style='width:100%;height:140px;object-fit:cover;border-radius:10px;margin-bottom:10px;'>" : "")
+      + "<div style='display:flex;justify-content:space-between;align-items:flex-start;'>"
+      + "<div><div style='font-size:1rem;font-weight:700;color:var(--charcoal);'>" + (e.cigar_name || "") + "</div>"
+      + "<div style='font-size:0.78rem;color:var(--ash);margin-top:2px;'>" + fam + "</div></div>"
+      + "<div style='text-align:right;'>"
+      + (stars ? "<span style='color:var(--gold);font-weight:700;'>" + stars + "</span>" : "")
+      + "<div style='font-size:0.75rem;color:var(--ash);margin-top:2px;'>" + (e.date_smoked || "") + "</div></div>"
+      + "</div>"
+      + (e.notes ? "<div style='font-size:0.82rem;color:#444;margin-top:10px;padding-top:10px;border-top:1px solid #eee;'>" + e.notes + "</div>" : "")
+      + (meta    ? "<div style='font-size:0.75rem;color:var(--ash);margin-top:6px;'>" + meta + "</div>" : "")
+      + "</div>";
+  }).join("");
+}
+
+// ── LOG A SMOKE ───────────────────────────────────────────────────────────────
+function openLogSmoke() {
+  if (!currentUser) { showPage("auth"); return; }
+  ["logCigarSearch","logRating","logPrice","logLocation","logNotes"].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = "";
+  });
+  document.getElementById("logSearchResults").innerHTML = "";
+  document.getElementById("logSelectedCigar").style.display = "none";
+  document.getElementById("logDate").value = new Date().toISOString().split("T")[0];
+  document.getElementById("logError").textContent = "";
+  document.getElementById("logPhotoPreview").style.display = "none";
+  document.getElementById("logPhotoName").textContent = "";
+  logSelectedCigar = null;
+  showPage("log");
+}
+
+async function submitLog() {
+  var err = document.getElementById("logError"); err.textContent = "";
+  if (!logSelectedCigar) { err.textContent = "Please select a cigar."; return; }
+  var rating   = document.getElementById("logRating").value.trim();
+  var price    = document.getElementById("logPrice").value.trim();
+  var location = document.getElementById("logLocation").value.trim();
+  var notes    = document.getElementById("logNotes").value.trim();
+  var date     = document.getElementById("logDate").value;
+  if (!rating || rating < 1 || rating > 100) { err.textContent = "Rating must be 1-100."; return; }
+  if (!date) { err.textContent = "Please enter a date."; return; }
+  if (!currentUser || !currentUser.supabaseId) { err.textContent = "Not logged in."; return; }
+  var btn = document.getElementById("logSaveBtn");
+  btn.textContent = "Saving..."; btn.disabled = true;
+  var photoUrl = null;
+  var f1 = document.getElementById("logPhoto").files[0];
+  var f2 = document.getElementById("logPhotoCamera").files[0];
+  if (f1 || f2) { showToast("Uploading photo..."); photoUrl = await uploadPhoto(f1 || f2, "logs"); }
+  var { error } = await _supa.from("cigar_logs").insert({
+    user_id: currentUser.supabaseId, cigar_name: logSelectedCigar.cigar.name,
+    brand: logSelectedCigar.brand, family: logSelectedCigar.family,
+    size: logSelectedCigar.cigar.size || null, shape: logSelectedCigar.cigar.shape || null,
+    strength: logSelectedCigar.cigar.strength || null, wrapper: logSelectedCigar.cigar.wrapper_type || null,
+    rating: parseInt(rating), price: price ? parseFloat(price) : null,
+    location: location || null, notes: notes || null, photo_url: photoUrl, date_smoked: date
+  });
+  btn.textContent = "Save to Journal"; btn.disabled = false;
+  if (error) { err.textContent = "Error: " + error.message; return; }
+  showToast("Smoke logged!");
+  showPage("dashboard");
+}
+
+function previewLogPhoto(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = document.getElementById("logPhotoPreview");
+      img.src = e.target.result; img.style.display = "block";
+      document.getElementById("logPhotoName").textContent = input.files[0].name;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+function clearLogCigar() {
+  logSelectedCigar = null;
+  document.getElementById("logSelectedCigar").style.display = "none";
+  document.getElementById("logCigarSearch").value = "";
+  document.getElementById("logSearchResults").innerHTML = "";
+}
+
+// ── CIGAR SEARCH ──────────────────────────────────────────────────────────────
+function handleSearchInput(q) {
+  var results = document.getElementById("searchResults");
+  if (!q || q.length < 2) { results.innerHTML = ""; return; }
+  var query = q.toLowerCase().trim();
+  results.innerHTML = "";
+  var count = 0;
+  for (var bi = 0; bi < caDatabase.length; bi++) {
+    var b = caDatabase[bi];
+    if (b.name.toLowerCase().indexOf(".html") !== -1) continue;
+    var bl = b.name.toLowerCase(), brandHit = bl.indexOf(query) !== -1, added = false;
+    for (var fi = 0; fi < b.families.length; fi++) {
+      var fam = b.families[fi];
+      if (!brandHit && fam.name.toLowerCase().indexOf(query) === -1) continue;
+      if (count >= 60) break;
+      if (!added) {
+        var hdr = document.createElement("div");
+        hdr.className = "search-brand-header"; hdr.textContent = b.name;
+        hdr.style.display = "none";
+        results.appendChild(hdr); added = true;
+
+      }
+      (function(bName, fName) {
+        var row = document.createElement("div");
+        row.className = "search-result-family"; row.textContent = fName;
+        row.onclick = function() { selectFamily(bName, fName); };
+        results.appendChild(row);
+      })(b.name, fam.name);
+      count++;
+    }
+  }
+  if (!results.children.length) {
+    results.innerHTML = "<div style='color:var(--ash);padding:12px;'>No matches found.</div>";
+  }
+}
+
+
+function selectFamily(brandName, familyName) {
+  var brand = null, family = null;
+  for (var i = 0; i < caDatabase.length; i++) { if (caDatabase[i].name === brandName) { brand = caDatabase[i]; break; } }
+  if (!brand) return;
+  for (var i = 0; i < brand.families.length; i++) { if (brand.families[i].name === familyName) { family = brand.families[i]; break; } }
+  if (!family) return;
+  var results = document.getElementById("searchResults");
+  results.innerHTML = "";
+  var hdr = document.createElement("div");
+  hdr.className = "search-brand-header"; hdr.style.cursor = "pointer";
+  hdr.textContent = "\u2190 " + brandName + " \u203a " + familyName;
+  hdr.onclick = function() { results.innerHTML = ""; document.getElementById("mainSearch").value = ""; };
+  results.appendChild(hdr);
+  if (!family.cigars || !family.cigars.length) {
+    var empty = document.createElement("div");
+    empty.style.cssText = "color:var(--ash);padding:12px 28px;"; empty.textContent = "No cigars listed yet.";
+    results.appendChild(empty); return;
+  }
+  family.cigars.forEach(function(c) {
+    var meta = "";
+    if (c.shape && c.shape !== "N/A") meta += " \u00b7 " + c.shape;
+    if (c.size  && c.size  !== "N/A") meta += " \u00b7 " + c.size;
+    var row = document.createElement("div");
+    row.className = "search-result-cigar";
+    row.textContent = "\uD83D\uDFE2 " + c.name + meta;
+    (function(bn, fn, cn) { row.onclick = function() { selectCigar(bn, fn, cn); }; })(brandName, familyName, c.name);
+    results.appendChild(row);
+  });
+}
+
+
+async function selectCigar(brandName, familyName, cigarName) {
+  var brand = null, family = null, cigar = null;
+  for (var i = 0; i < caDatabase.length; i++) { if (caDatabase[i].name === brandName) { brand = caDatabase[i]; break; } }
+  if (!brand) return;
+  for (var i = 0; i < brand.families.length; i++) { if (brand.families[i].name === familyName) { family = brand.families[i]; break; } }
+  if (!family) return;
+  for (var i = 0; i < family.cigars.length; i++) { if (family.cigars[i].name === cigarName) { cigar = family.cigars[i]; break; } }
+  if (!cigar) return;
+  document.getElementById("mainSearch").value = "";
+
+  var v = function(a,b) { return (a && a!=="N/A" && a!=="--") ? a : (b && b!=="N/A" && b!=="--") ? b : null; };
+
+  // Fetch CigarLog community average
+  var clScore = "Not yet reviewed";
+  var { data: logs } = await _supa.from("cigar_logs").select("rating")
+    .eq("cigar_name", cigarName).eq("brand", brandName);
+  if (logs && logs.length) {
+    var avg = logs.reduce(function(sum, r) { return sum + r.rating; }, 0) / logs.length;
+    clScore = Math.round(avg) + "/100 (" + logs.length + " review" + (logs.length === 1 ? "" : "s") + ")";
+  }
+
+  var caScore = v(cigar.ca_ranking, null);
+  var caPrice = v(cigar.ca_price, family.ca_price);
+
+  var fields = [
+    ["Size",     v(cigar.size, null)],
+    ["Shape",    v(cigar.shape, null)],
+    ["Strength", v(cigar.strength, family.strength)],
+    ["Wrapper",  v(cigar.wrapper_type, family.wrapper_type)],
+    ["Binder",   v(cigar.binder, family.binder)],
+    ["Filler",   v(cigar.filler, family.filler)],
+    ["Country",  v(cigar.country, family.country)],
+    ["CA Price", caPrice],
+  ];
+  var rows = "";
+  fields.forEach(function(f) {
+    if (f[1]) rows += "<div class='cigar-tile-row'><span class='cigar-tile-label'>" + f[0] + "</span><span class='cigar-tile-value'>" + f[1] + "</span></div>";
+  });
+
+  var subtitle = (familyName && familyName !== brandName) ? brandName + " &middot; " + familyName : brandName;
+  var results = document.getElementById("searchResults");
+  results.innerHTML = "";
+  var tile = document.createElement("div");
+  tile.className = "cigar-info-tile";
+
+  var tileHead = document.createElement("div");
+  tileHead.className = "cigar-tile-header";
+
+  var backBtn = document.createElement("button");
+  backBtn.className = "cigar-tile-back"; backBtn.textContent = "\u2190 Back";
+  backBtn.onclick = function() { results.innerHTML = ""; document.getElementById("mainSearch").value = ""; };
+
+  var title = document.createElement("div");
+  title.className = "cigar-tile-title"; title.textContent = cigar.name;
+
+  var sub = document.createElement("div");
+  sub.className = "cigar-tile-subtitle"; sub.innerHTML = subtitle;
+
+  // Score badges in the header
+  var scores = document.createElement("div");
+  scores.style.cssText = "display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;";
 scores.innerHTML =
   "<div style='background:rgba(201,168,76,0.12);border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:4px 10px;font-size:0.78rem;'>" +
     "<span style='color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;'>Cigar Aficionado Score</span>" +
@@ -7,3 +740,484 @@ scores.innerHTML =
     "<span style='color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;'>CigarLog Score</span>" +
     "<div style='color:#6dbf85;font-weight:700;font-size:1rem;'>" + clScore + "</div>" +
   "</div>";
+
+
+  tileHead.appendChild(backBtn);
+  tileHead.appendChild(title);
+  tileHead.appendChild(sub);
+  tileHead.appendChild(scores);
+
+  var tileBody = document.createElement("div");
+  tileBody.className = "cigar-tile-body";
+  tileBody.innerHTML = rows || "<div style='color:var(--ash);'>No details available.</div>";
+
+  tile.appendChild(tileHead);
+  tile.appendChild(tileBody);
+  results.appendChild(tile);
+}
+
+// ── LOG SEARCH ────────────────────────────────────────────────────────────────
+function handleLogSearch(q) {
+  var div = document.getElementById("logSearchResults");
+  if (!q || q.length < 2) { div.innerHTML = ""; return; }
+  var query = q.toLowerCase().trim(), hits = [];
+  for (var bi = 0; bi < caDatabase.length; bi++) {
+    var b = caDatabase[bi];
+    if (b.name.toLowerCase().indexOf(".html") !== -1) continue;
+    var bl = b.name.toLowerCase(), brandHit = bl.indexOf(query) !== -1;
+    for (var fi = 0; fi < b.families.length; fi++) {
+      var fam = b.families[fi];
+      if (brandHit || fam.name.toLowerCase().indexOf(query) !== -1 || (bl + " " + fam.name.toLowerCase()).indexOf(query) !== -1)
+        hits.push({ brand: b.name, fam: fam });
+    }
+  }
+  div.innerHTML = "";
+  if (!hits.length) {
+    var empty = document.createElement("div");
+    empty.style.cssText = "color:var(--ash);padding:8px 12px;font-size:0.85rem;";
+    empty.textContent = "No matches.";
+    div.appendChild(empty); return;
+  }
+  var lastBrand = "";
+  hits.forEach(function(item) {
+    var count = item.fam.cigars ? item.fam.cigars.length : 0;
+    if (item.brand !== lastBrand) {
+      lastBrand = item.brand;
+    }
+    var row = document.createElement("div");
+    row.style.cssText = "padding:4px 14px 4px 22px;cursor:pointer;border-bottom:1px solid var(--cream);font-size:0.88rem;";
+    var nameSpan = document.createElement("span");
+    nameSpan.textContent = item.fam.name + " ";
+    var countSpan = document.createElement("span");
+    countSpan.style.cssText = "color:var(--ash);font-size:0.75rem;";
+    countSpan.textContent = "(" + count + ")";
+    row.appendChild(nameSpan); row.appendChild(countSpan);
+    (function(bn, fn) {
+      row.onmousedown = function() { expandLogFamily(bn, fn); };
+    })(item.brand, item.fam.name);
+    div.appendChild(row);
+  });
+}
+
+
+function expandLogFamily(brandName, familyName) {
+  var div = document.getElementById("logSearchResults");
+  var brand = null, fam = null;
+  for (var i = 0; i < caDatabase.length; i++) { if (caDatabase[i].name === brandName) { brand = caDatabase[i]; break; } }
+  if (!brand) return;
+  for (var i = 0; i < brand.families.length; i++) { if (brand.families[i].name === familyName) { fam = brand.families[i]; break; } }
+  if (!fam) return;
+  div.innerHTML = "";
+  var back = document.createElement("div");
+  back.style.cssText = "padding:8px 14px;cursor:pointer;font-size:0.82rem;color:var(--tobacco);font-weight:700;border-bottom:1px solid var(--light-ash);";
+  back.textContent = "\u2190 Back";
+  back.onmousedown = function() { handleLogSearch(document.getElementById("logCigarSearch").value); };
+  div.appendChild(back);
+  var breadcrumb = document.createElement("div");
+  breadcrumb.style.cssText = "padding:5px 14px;font-size:0.78rem;color:var(--ash);";
+  breadcrumb.textContent = brandName + " \u203a " + familyName;
+  div.appendChild(breadcrumb);
+  if (!fam.cigars || !fam.cigars.length) {
+    var empty = document.createElement("div");
+    empty.style.cssText = "color:var(--ash);padding:8px 14px;font-size:0.85rem;";
+    empty.textContent = "No sizes listed.";
+    div.appendChild(empty); return;
+  }
+  fam.cigars.forEach(function(c) {
+    var row = document.createElement("div");
+    row.style.cssText = "padding:9px 14px 9px 22px;cursor:pointer;font-size:0.88rem;border-bottom:1px solid var(--cream);";
+    var meta = (c.size && c.size !== "N/A") ? " \u00b7 " + c.size : "";
+    row.textContent = c.name + meta;
+    (function(bn, fn, cn) {
+      row.onmousedown = function() { selectLogCigar(bn, fn, cn); };
+    })(brandName, familyName, c.name);
+    div.appendChild(row);
+  });
+}
+
+
+function selectLogCigar(brandName, familyName, cigarName) {
+  var brand = null, family = null, cigar = null;
+  for (var i = 0; i < caDatabase.length; i++) { if (caDatabase[i].name === brandName) { brand = caDatabase[i]; break; } }
+  if (!brand) return;
+  for (var i = 0; i < brand.families.length; i++) { if (brand.families[i].name === familyName) { family = brand.families[i]; break; } }
+  if (!family) return;
+  for (var i = 0; i < family.cigars.length; i++) { if (family.cigars[i].name === cigarName) { cigar = family.cigars[i]; break; } }
+  if (!cigar) return;
+  logSelectedCigar = { brand: brandName, family: familyName, cigar: cigar };
+  document.getElementById("logCigarSearch").value = "";
+  document.getElementById("logSearchResults").innerHTML = "";
+  document.getElementById("logSelectedName").textContent = brandName + " — " + cigarName;
+  var meta = [];
+  if (cigar.size  && cigar.size  !== "N/A") meta.push(cigar.size);
+  if (cigar.shape && cigar.shape !== "N/A") meta.push(cigar.shape);
+  document.getElementById("logSelectedMeta").textContent = meta.join(" · ");
+  document.getElementById("logSelectedCigar").style.display = "block";
+}
+
+// ── COMMUNITY FEED ────────────────────────────────────────────────────────────
+async function renderFeed() {
+  var div = document.getElementById("feedPosts"); if (!div) return;
+  div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:20px;'>Loading...</div>";
+  var { data: posts } = await _supa.from("feed_posts").select("*").order("created_at", { ascending: false }).limit(50);
+  posts = posts || [];
+  if (!posts.length) { div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:30px;'>No posts yet.</div>"; return; }
+  div.innerHTML = posts.map(function(p) {
+    return "<div style='padding:14px 0;border-bottom:1px solid var(--light-ash);'>"
+      + "<div style='display:flex;justify-content:space-between;margin-bottom:4px;'>"
+      + "<strong style='color:var(--dark-tobacco);'>" + (p.username || "Unknown") + "</strong>"
+      + "<span style='font-size:0.75rem;color:var(--ash);'>" + new Date(p.created_at).toLocaleDateString() + "</span>"
+      + "</div>"
+      + (p.photo_url ? "<img src='" + p.photo_url + "' style='max-width:100%;border-radius:8px;margin-bottom:6px;'>" : "")
+      + "<div style='color:var(--charcoal);font-size:0.92rem;'>" + (p.text || "") + "</div>"
+      + "</div>";
+  }).join("");
+}
+
+async function postToFeed() {
+  var input = document.getElementById("feedInput");
+  var text = input ? input.value.trim() : "";
+  if (!text || !currentUser) return;
+  var { error } = await _supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text });
+  if (!error) { input.value = ""; renderFeed(); } else showToast("Could not post.");
+}
+
+// ── SIDEBAR MESSAGES ──────────────────────────────────────────────────────────
+async function renderSidebarFeed() {
+  var div = document.getElementById("sidebarFeedPosts"); if (!div) return;
+  var { data: posts } = await _supa.from("feed_posts").select("*").order("created_at", { ascending: true }).limit(60);
+  div.innerHTML = "";
+  if (!posts || !posts.length) { div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:20px;font-size:0.85rem;'>No messages yet.</div>"; return; }
+  posts.forEach(function(p) { appendSidebarPost(p); });
+  div.scrollTop = div.scrollHeight;
+}
+
+function appendSidebarPost(post) {
+  var div = document.getElementById("sidebarFeedPosts"); if (!div) return;
+  var isMe = currentUser && post.username === (currentUser.displayName || currentUser.username);
+  var wrap = document.createElement("div");
+  wrap.style.cssText = "display:flex;flex-direction:column;max-width:82%;" + (isMe ? "align-self:flex-end;align-items:flex-end;" : "align-self:flex-start;align-items:flex-start;");
+  var bubble = document.createElement("div");
+  bubble.style.cssText = "padding:7px 11px;border-radius:" + (isMe ? "14px 14px 3px 14px" : "14px 14px 14px 3px") + ";background:" + (isMe ? "var(--tobacco)" : "var(--cream)") + ";color:" + (isMe ? "#fff" : "var(--charcoal)") + ";font-size:0.85rem;word-break:break-word;";
+  if (post.photo_url) { var img = document.createElement("img"); img.src = post.photo_url; img.style.cssText = "max-width:140px;border-radius:8px;margin-bottom:3px;display:block;"; bubble.appendChild(img); }
+  if (post.text) {
+    if (/(https?:\/\/[^\s]+)/g.test(post.text)) {
+      post.text.split(/(https?:\/\/[^\s]+)/g).forEach(function(part) {
+        if (/^https?:\/\//.test(part)) {
+          var a = document.createElement('a');
+          a.href = part; a.textContent = part; a.target = '_blank';
+          a.style.cssText = 'color:var(--gold-light);word-break:break-all;display:block;margin-bottom:4px;';
+          bubble.appendChild(a);
+          var card = document.createElement('div');
+          card.style.cssText = 'margin-top:6px;border-radius:10px;overflow:hidden;border:1px solid var(--light-ash);cursor:pointer;max-width:280px;';
+          card.onclick = function(){ window.open(part,'_blank'); };
+          bubble.appendChild(card);
+          fetch('https://flrqhivvjimahfrdoxwt.supabase.co/functions/v1/link-preview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZscnFoaXZ2amltYWhmcmRveHd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODkyNzUsImV4cCI6MjA4ODQ2NTI3NX0.3PoCVkRGM3fLyu0MXsaz4ZKH1zsuo_HVcKUZpciOAAk' },
+            body: JSON.stringify({ url: part })
+          }).then(function(res) { return res.json(); }).then(function(r) {
+            if (!r || r.error) return;
+            card.innerHTML =
+              (r.image ? '<img src="'+r.image+'" style="width:100%;max-height:130px;object-fit:cover;display:block;">' : '') +
+              '<div style="padding:8px 10px;background:#fff;">' +
+              '<div style="font-size:0.82rem;font-weight:700;color:var(--charcoal);line-height:1.3;margin-bottom:3px;">'+r.title+'</div>' +
+              '<div style="font-size:0.72rem;color:var(--ash);">'+r.domain+'</div>' +
+              '</div>';
+          });
+        } else if (part) {
+          bubble.appendChild(document.createTextNode(part));
+        }
+      });
+    } else {
+      bubble.appendChild(document.createTextNode(post.text));
+    }
+  }
+  var meta = document.createElement("div");
+  meta.style.cssText = "font-size:0.65rem;color:var(--ash);margin-top:2px;";
+  meta.textContent = (isMe ? "" : post.username + " · ") + new Date(post.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  wrap.appendChild(bubble); wrap.appendChild(meta); div.appendChild(wrap);
+  div.scrollTop = div.scrollHeight;
+}
+
+
+function subscribeToFeed() {
+  if (_feedChannel) _supa.removeChannel(_feedChannel);
+  _feedChannel = _supa.channel("feed_realtime")
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "feed_posts" }, function(payload) {
+      appendSidebarPost(payload.new);
+    }).subscribe();
+}
+
+async function postSidebarFeed() {
+  var input = document.getElementById("sidebarFeedInput");
+  var text = input ? input.value.trim() : "";
+  if (!text || !currentUser) return;
+  input.value = "";
+  await _supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text });
+  appendSidebarPost({ username: currentUser.displayName || currentUser.username, text: text, photo_url: null, created_at: new Date().toISOString() });
+
+}
+
+async function postSidebarMedia(fileInput) {
+  if (!fileInput || !fileInput.files || !fileInput.files[0] || !currentUser) return;
+  showToast("Uploading...");
+  var url = await uploadPhoto(fileInput.files[0], "feed");
+  fileInput.value = "";
+  if (!url) { showToast("Upload failed."); return; }
+  await _supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: "", photo_url: url });
+}
+
+// ── INVITES ───────────────────────────────────────────────────────────────────
+async function generateInvite() {
+  var name = document.getElementById('inviteName').value.trim();
+  if (!name) { showToast('Please enter a name for the invite.'); return; }
+  var token = Math.random().toString(36).substring(2,10).toUpperCase();
+  var expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  var { error } = await _supa.from('invites').insert({
+    invited_by: currentUser.supabaseId,
+    invited_name: name,
+    invited_email: '',
+    token: token,
+    used: false,
+    expires_at: expires_at
+  });
+  if (error) { showToast('Error: ' + error.message); return; }
+  var link = window.location.origin + window.location.pathname + '?invite=' + token;
+  document.getElementById('inviteLinkText').textContent = link;
+  document.getElementById('inviteResult').style.display = 'block';
+  renderInviteList();
+}
+
+async function regenerateInvite(oldId, name) {
+  var token = Math.random().toString(36).substring(2,10).toUpperCase();
+  var expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  var { error } = await _supa.from('invites').update({
+    token: token,
+    used: false,
+    expires_at: expires_at,
+    accepted_by: null
+  }).eq('id', oldId);
+  if (error) { showToast('Error: ' + error.message); return; }
+  var link = window.location.origin + window.location.pathname + '?invite=' + token;
+  document.getElementById('inviteLinkText').textContent = link;
+  document.getElementById('inviteResult').style.display = 'block';
+  showToast('New link generated for ' + name + '!');
+  renderInviteList();
+}
+
+function copyInviteLink() {
+  navigator.clipboard.writeText(document.getElementById('inviteLinkText').textContent)
+    .then(function() { showToast('Link copied!'); });
+}
+
+async function renderInviteList() {
+  var div = document.getElementById('inviteList');
+  if (!div || !currentUser) return;
+  var { data: invites } = await _supa.from('invites').select('*')
+    .eq('invited_by', currentUser.supabaseId)
+    .order('created_at', { ascending: false });
+  if (!invites || !invites.length) {
+    div.innerHTML = "<div style='color:var(--ash);font-size:0.85rem;'>No invites yet.</div>";
+    return;
+  }
+  div.innerHTML = '';
+  invites.forEach(function(inv) {
+    var now = new Date();
+    var expired = inv.expires_at && new Date(inv.expires_at) < now;
+    var status, statusColor;
+    if (inv.accepted_by) {
+      status = '✓ Confirmed — ' + inv.accepted_by;
+      statusColor = 'var(--success)';
+    } else if (expired) {
+      status = 'Expired';
+      statusColor = 'var(--ash)';
+    } else {
+      status = 'Pending';
+      statusColor = 'var(--tobacco)';
+    }
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--light-ash);font-size:0.85rem;gap:8px;';
+    var left = document.createElement('div');
+    left.innerHTML = '<strong>' + inv.invited_name + '</strong>'
+      + '<div style="font-size:0.75rem;color:var(--ash);margin-top:2px;">'
+      + (inv.expires_at ? 'Expires ' + new Date(inv.expires_at).toLocaleDateString() : 'No expiry')
+      + '</div>';
+    var right = document.createElement('div');
+    right.style.cssText = 'display:flex;align-items:center;gap:8px;text-align:right;';
+    var statusSpan = document.createElement('span');
+    statusSpan.style.cssText = 'color:' + statusColor + ';font-size:0.78rem;font-weight:700;';
+    statusSpan.textContent = status;
+    right.appendChild(statusSpan);
+    if (expired && !inv.accepted_by) {
+      var regenBtn = document.createElement('button');
+      regenBtn.style.cssText = 'background:var(--cream);border:1.5px solid var(--light-ash);border-radius:8px;padding:4px 10px;font-size:0.75rem;cursor:pointer;color:var(--tobacco);font-weight:700;';
+      regenBtn.textContent = 'New Link';
+      (function(id, n) {
+        regenBtn.onclick = function() { regenerateInvite(id, n); };
+      })(inv.id, inv.invited_name);
+      right.appendChild(regenBtn);
+    }
+    row.appendChild(left);
+    row.appendChild(right);
+    div.appendChild(row);
+  });
+}
+
+// ADMIN
+function switchAdminTab(tab) {
+  document.getElementById('adminUsers').style.display = tab === 'users' ? 'block' : 'none';
+  document.getElementById('adminFeed').style.display = tab === 'messages' ? 'block' : 'none';
+  document.getElementById('adminTabUsers').style.background = tab === 'users' ? 'var(--ember)' : '';
+  document.getElementById('adminTabMessages').style.background = tab === 'messages' ? 'var(--ember)' : '';
+}
+
+async function renderAdminPanel() {
+  var panel = document.getElementById('adminPanel');
+  panel.style.display = 'block';
+  switchAdminTab('users');
+  await renderAdminUsers();
+  await renderAdminMessages();
+}
+
+async function renderAdminUsers() {
+  var uDiv = document.getElementById('adminUsers');
+  uDiv.innerHTML = '<div style="color:var(--ash);padding:12px;">Loading...</div>';
+  var { data: users } = await _supa.from('profiles').select().order('created_at');
+  uDiv.innerHTML = '';
+  if (!users || !users.length) { uDiv.innerHTML = '<div style="color:var(--ash);">No users found.</div>'; return; }
+  users.forEach(function(u) {
+    var row = document.createElement('div');
+    row.className = 'admin-item';
+    row.innerHTML = `
+      <div>
+        <div style="font-weight:700;font-size:0.92rem;">${u.display_name || u.username}</div>
+        <div style="font-size:0.75rem;color:var(--ash);">@${u.username} · ${u.email || 'no email'} · joined ${u.created_at ? new Date(u.created_at).toLocaleDateString() : '?'}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        ${u.email ? `<button class="admin-btn" style="background:var(--tobacco);" onclick="sendPasswordReset('${u.email}','${u.display_name||u.username}')">Reset PW</button>` : ''}
+        <button class="admin-btn" onclick="deleteUser('${u.id}')">Delete</button>
+      </div>`;
+    uDiv.appendChild(row);
+  });
+}
+
+async function renderAdminMessages() {
+  var pDiv = document.getElementById('adminFeed');
+  pDiv.innerHTML = '<div style="color:var(--ash);padding:12px;">Loading...</div>';
+  var { data: posts } = await _supa.from('feedposts').select().order('created_at', { ascending: false }).limit(50);
+  pDiv.innerHTML = '';
+  if (!posts || !posts.length) { pDiv.innerHTML = '<div style="color:var(--ash);">No messages.</div>'; return; }
+  posts.forEach(function(p) {
+    var row = document.createElement('div');
+    row.className = 'admin-item';
+    row.innerHTML = `
+      <div>
+        <div style="font-weight:700;font-size:0.88rem;">${p.username}</div>
+        <div style="font-size:0.82rem;color:var(--charcoal);margin-top:2px;">${(p.text||'').substring(0,80)}${p.photo_url ? ' 📷' : ''}</div>
+        <div style="font-size:0.72rem;color:var(--ash);margin-top:2px;">${new Date(p.created_at).toLocaleString()}</div>
+      </div>
+      <button class="admin-btn" onclick="deletePost('${p.id}')">Delete</button>`;
+    pDiv.appendChild(row);
+  });
+}
+
+async function deleteUser(id) {
+  if (!confirm('Delete this user?')) return;
+  var { error } = await _supa.from('profiles').delete().eq('id', id);
+  if (error) { showToast('Error: ' + error.message); return; }
+  showToast('User deleted');
+  renderAdminUsers();
+}
+
+async function deletePost(id) {
+  if (!confirm('Delete this message?')) return;
+  await _supa.from('feedposts').delete().eq('id', id);
+  showToast('Message deleted');
+  renderAdminMessages();
+  renderSidebarFeed();
+}
+
+async function sendPasswordReset(email, name) {
+  if (!confirm('Send password reset email to ' + name + '?')) return;
+  var { error } = await _supa.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname
+  });
+  if (error) { showToast('Error: ' + error.message); return; }
+  showToast('Reset email sent to ' + name);
+}
+
+
+// ── LOCATION ──────────────────────────────────────────────────────────────────
+function useMyLocation() {
+  if (!navigator.geolocation) { showToast("Geolocation not supported"); return; }
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    var lat = pos.coords.latitude.toFixed(4), lon = pos.coords.longitude.toFixed(4);
+    fetch("https://nominatim.openstreetmap.org/reverse?lat=" + lat + "&lon=" + lon + "&format=json")
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        var a = d.address;
+        document.getElementById("logLocation").value = (a.city || a.town || a.village || a.county || "") + (a.state ? ", " + a.state : "") || lat + "," + lon;
+      }).catch(function() { document.getElementById("logLocation").value = lat + "," + lon; });
+  });
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById("toast-el");
+  t.textContent = msg; t.style.opacity = "1";
+  setTimeout(function() { t.style.opacity = "0"; }, 2500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+async function init() {
+  await loadCA();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const inviteToken = urlParams.get('invite');
+  if (inviteToken) {
+    const { data: inv } = await _supa.from('invites').select().eq('token', inviteToken).single();
+    if (inv && !inv.used && new Date(inv.expires_at) > new Date()) {
+      updateNav();
+      showPage('auth');
+      document.getElementById('form-register').classList.remove('hidden');
+      document.getElementById('form-login').classList.add('hidden');
+      document.getElementById('regInviteCode').value = inviteToken;
+      showToast("You've been invited! Fill in your details below.");
+    } else {
+      updateNav();
+      showPage('auth');
+      showToast('This invite link is invalid or has already been used.');
+    }
+    return;
+  }
+
+  // Check session
+  var session = localStorage.getItem('cl_session');
+  if (!session) { updateNav(); showPage('auth'); return; }
+  var { data: profile } = await _supa.from('profiles').select().eq('username', session).single();
+  if (!profile) { updateNav(); showPage('auth'); return; }
+  currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.display_name, avatar: profile.avatar, isAdmin: profile.is_admin };
+  updateNav();
+  showPage('dashboard');
+
+  var ff = document.getElementById("sidebarFeedFile");
+  var fc = document.getElementById("sidebarFeedCam");
+  var lp = document.getElementById("logPhoto");
+  var lc = document.getElementById("logPhotoCamera");
+  if (ff) ff.onchange = function() { postSidebarMedia(this); };
+  if (fc) fc.onchange = function() { postSidebarMedia(this); };
+  if (lp) lp.onchange = function() { previewLogPhoto(this); };
+  if (lc) lc.onchange = function() { previewLogPhoto(this); };
+
+  window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.page) { showPage(e.state.page); }
+    else { showPage('dashboard'); }
+  });
+}
+
+init();
+
+</script>
+</body>
+</html>
