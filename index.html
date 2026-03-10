@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- 24 -->
+<meta charset="UTF-8"><!-- 25 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CigarLog</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -1177,6 +1177,13 @@ function setBottomNav(page) {
     if (el) el.classList.add('active');
   }
 }
+function handleProfileBtn() {
+  if (currentUser && currentUser.isadmin) {
+    showPage('settings');
+  } else {
+    showPage('profile');
+  }
+}
 
 // FEED PAGE
 async function renderFeedPage() {
@@ -1531,7 +1538,8 @@ init();
   <button class="bottom-nav-btn" id="bnLog" onclick="openLogSmoke()" title="Log">🚬</button>
   <button class="bottom-nav-btn" id="bnDiscover" onclick="showPage('dashboard')" title="Discover">🔍</button>
   <button class="bottom-nav-btn" id="bnReviews" onclick="showPage('reviews')" title="Reviews">⭐</button>
-  <button class="bottom-nav-btn" id="bnProfile" onclick="showPage('profile')" title="Profile">👤</button>
+  <button class="bottom-nav-btn" id="bnProfile" onclick="handleProfileBtn()" title="Profile">👤</button>
+  
 </div>
 
 <link rel="manifest" href="manifest.json">
