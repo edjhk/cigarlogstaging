@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- 22 -->
+<meta charset="UTF-8"><!-- 23 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CigarLog</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -1037,9 +1037,10 @@ async function postSidebarFeed() {
   var { data, error } = await supa.from("feed_posts").insert({
     user_id: currentUser.supabaseId,
     username: currentUser.displayName || currentUser.username,
-    text: text || null,
+    text: text || "",
     photo_url: photoUrl
   }).select();
+
   console.log("insert result:", data, "error:", error);
   renderSidebarFeed();
 }
