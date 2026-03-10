@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- V3 -->
+<meta charset="UTF-8"><!-- V4 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CigarLog</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -329,7 +329,7 @@ async function doLogin() {
   if (error) { err.textContent = error.message; btn.textContent = "Sign In"; btn.disabled = false; return; }
   var { data: profile } = await _supa.from("profiles").select().eq("username", u).single();
   if (!profile) { err.textContent = "Profile not found."; btn.textContent = "Sign In"; btn.disabled = false; return; }
-  currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.display_name, avatar: profile.avatar, isAdmin: profile.is_admin };
+  currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.displayname, avatar: profile.avatar, isAdmin: profile.is.admin };
   localStorage.setItem("cl_session", u);
   btn.textContent = "Sign In"; btn.disabled = false;
   updateNav();
@@ -353,10 +353,11 @@ async function doRegister() {
   if (p.length < 6) { err.textContent = "Password must be 6+ characters."; return; }
   var btn = document.getElementById("regBtn");
   btn.textContent = "Creating..."; btn.disabled = true;
-  var result = await _supa.auth.signUp({ email: u + "@cigarlog.app", password: p });
+  var email = document.getElementById("regEmail").value.trim();
+  var result = await _supa.auth.signUp({ email: email, password: p });
   console.log("signUp result:", result.data, result.error);
   if (result.error) { err.textContent = result.error.message; btn.textContent = "Create Account"; btn.disabled = false; return; }
-  await _supa.from("profiles").insert({ user_id: result.data.user.id, username: u, display_name: dn, avatar: "", is_admin: false });
+  await _supa.from("profiles").insert({ user_id: result.data.user.id, username: u, displayname: dn, avatar: "", isadmin: false });
   // Mark invite as used if one was provided
   const usedToken = document.getElementById('regInviteCode').value.trim();
   if (usedToken) {
