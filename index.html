@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- 5-->
+<meta charset="UTF-8"><!-- 11-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CigarLog</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -123,7 +123,7 @@ window.supaReady = false;
       </div>
       <div class="form-group">
         <label class="form-label">Your Name</label>
-        <input type="text" class="form-input" id="regDisplayName" placeholder="e.g. Ed">
+        <input type="text" class="form-input" id="regdisplay_name" placeholder="e.g. Ed">
       </div>
       <div class="form-group">
         <label class="form-label">Email</label>
@@ -334,7 +334,8 @@ async function doLogin() {
   var { data, error } = await supa.auth.signInWithPassword({ email: profile.email, password: p });
   if (error) { err.textContent = error.message; btn.textContent = "Sign In"; btn.disabled = false; return; }
 
-  currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.displayname, avatar: profile.avatar, isAdmin: profile.isadmin };
+  currentUser = { supabaseId: profile.id, username: profile.username, display_name: profile.display_name, avatar: 
+  profile.avatar, is_admin: profile.is_admin };
   localStorage.setItem("cl_session", u);
   btn.textContent = "Sign In"; btn.disabled = false;
   updateNav();
@@ -349,22 +350,33 @@ function showAuthForm(which) {
 
 async function doRegister() {
   var u   = document.getElementById("regUsername").value.trim().toLowerCase();
-  var dn  = document.getElementById("regDisplayName").value.trim() || u;
+  var dn  = document.getElementById("regdisplay_name").value.trim() || u;
   var p   = document.getElementById("regPassword").value;
+  var email = document.getElementById("regEmail").value.trim();
   var err = document.getElementById("regError");
   err.textContent = "";
   const inviteCode = document.getElementById("regInviteCode").value.trim();
   if (!inviteCode) { err.textContent = "A valid invite link is required to register."; return; }
-  if (!u || !p) { err.textContent = "All fields required."; return; }
+  if (!u || !p || !email) { err.textContent = "All fields required."; return; }
   if (p.length < 6) { err.textContent = "Password must be 6+ characters."; return; }
   var btn = document.getElementById("regBtn");
   btn.textContent = "Creating..."; btn.disabled = true;
-  var email = document.getElementById("regEmail").value.trim();
   var result = await supa.auth.signUp({ email: email, password: p });
   console.log("signUp result:", result.data, result.error);
   if (result.error) { err.textContent = result.error.message; btn.textContent = "Create Account"; btn.disabled = false; return; }
-  await supa.from("profiles").insert({ user_id: result.data.user.id, username: u, displayname: dn, avatar: "", isadmin: false });
-  // Mark invite as used if one was provided
+  const { data: profileData, error: profileError } = await 
+  supa.from("profiles").insert({ 
+    id: result.data.user.id,
+    user_id: result.data.user.id, 
+    username: u, 
+    display_name: dn, 
+    avatar: "", 
+    is_admin: false,
+    email: email
+  });
+  console.log("Profile insert:", profileData, profileError);
+  if (profileError) { err.textContent = "Account created but profile failed: " + profileError.message; 
+  btn.textContent = "Create Account"; btn.disabled = false; return; }
   const usedToken = document.getElementById('regInviteCode').value.trim();
   if (usedToken) {
     await supa.from('invites')
@@ -440,11 +452,11 @@ function updateNav() {
   var pill = document.createElement("div");
   pill.className = "user-pill";
   pill.onclick = toggleUserMenu;
-  pill.innerHTML = "<div class='user-avatar-sm'>" + (currentUser.avatar || "") + "</div><span>" + currentUser.displayName + "</span><span style='font-size:0.7rem;margin-left:4px;color:var(--ash);'>&#9660;</span>";
+  pill.innerHTML = "<div class='user-avatar-sm'>" + (currentUser.avatar || "") + "</div><span>" + currentUser.display_name + "</span><span style='font-size:0.7rem;margin-left:4px;color:var(--ash);'>&#9660;</span>";
   var drop = document.createElement("div");
   drop.id = "userDropdown";
   drop.style.cssText = "display:none;position:absolute;top:44px;right:0;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15);min-width:160px;z-index:200;overflow:hidden;";
-  if (currentUser.isAdmin) {
+  if (currentUser.is_admin) {
     var adm = document.createElement("div");
     adm.style.cssText = "padding:12px 16px;cursor:pointer;font-size:0.9rem;border-bottom:1px solid var(--light-ash);";
     adm.textContent = "Admin";
@@ -479,7 +491,7 @@ function showPage(page) {
   if (page === "dashboard")  { renderDashboard(); renderSidebarFeed(); if (!feedchannel) subscribeToFeed(); }
   if (page === "messages")   { renderFeed(); }
   if (page === "invite")     { renderInviteList(); }
-  if (page === "settings" && currentUser && currentUser.isAdmin) renderAdminPanel();
+  if (page === "settings" && currentUser && currentUser.is_admin) renderAdminPanel();
   window.scrollTo(0, 0);
 }
 
@@ -904,7 +916,7 @@ async function postToFeed() {
   var input = document.getElementById("feedInput");
   var text = input ? input.value.trim() : "";
   if (!text || !currentUser) return;
-  var { error } = await supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text });
+  var { error } = await supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.display_name || currentUser.username, text: text });
   if (!error) { input.value = ""; renderFeed(); } else showToast("Could not post.");
 }
 
@@ -920,7 +932,7 @@ async function renderSidebarFeed() {
 
 function appendSidebarPost(post) {
   var div = document.getElementById("sidebarFeedPosts"); if (!div) return;
-  var isMe = currentUser && post.username === (currentUser.displayName || currentUser.username);
+  var isMe = currentUser && post.username === (currentUser.display_name || currentUser.username);
   var wrap = document.createElement("div");
   wrap.style.cssText = "display:flex;flex-direction:column;max-width:82%;" + (isMe ? "align-self:flex-end;align-items:flex-end;" : "align-self:flex-start;align-items:flex-start;");
   var bubble = document.createElement("div");
@@ -980,8 +992,8 @@ async function postSidebarFeed() {
   var text = input ? input.value.trim() : "";
   if (!text || !currentUser) return;
   input.value = "";
-  await supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text });
-  appendSidebarPost({ username: currentUser.displayName || currentUser.username, text: text, photo_url: null, created_at: new Date().toISOString() });
+  await supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.display_name || currentUser.username, text: text });
+  appendSidebarPost({ username: currentUser.display_name || currentUser.username, text: text, photo_url: null, created_at: new Date().toISOString() });
 
 }
 
@@ -991,7 +1003,7 @@ async function postSidebarMedia(fileInput) {
   var url = await uploadPhoto(fileInput.files[0], "feed");
   fileInput.value = "";
   if (!url) { showToast("Upload failed."); return; }
-  await supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: "", photo_url: url });
+  await supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.display_name || currentUser.username, text: "", photo_url: url });
 }
 
 // ── INVITES ───────────────────────────────────────────────────────────────────
@@ -1117,11 +1129,11 @@ async function renderAdminUsers() {
     row.className = 'admin-item';
     row.innerHTML = `
       <div>
-        <div style="font-weight:700;font-size:0.92rem;">${u.displayname || u.username}</div>
+        <div style="font-weight:700;font-size:0.92rem;">${u.display_name || u.username}</div>
         <div style="font-size:0.75rem;color:var(--ash);">@${u.username} · ${u.email || 'no email'} · joined ${u.created_at ? new Date(u.created_at).toLocaleDateString() : '?'}</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
-        ${u.email ? `<button class="admin-btn" style="background:var(--tobacco);" onclick="sendPasswordReset('${u.email}','${u.displayname||u.username}')">Reset PW</button>` : ''}
+        ${u.email ? `<button class="admin-btn" style="background:var(--tobacco);" onclick="sendPasswordReset('${u.email}','${u.display_name||u.username}')">Reset PW</button>` : ''}
         <button class="admin-btn" onclick="deleteUser('${u.id}')">Delete</button>
       </div>`;
     uDiv.appendChild(row);
@@ -1226,7 +1238,8 @@ var { data: { session: authSession } } = await supa.auth.getSession();
 if (!authSession) { updateNav(); showPage('auth'); return; }
 var { data: profile } = await supa.from('profiles').select().eq('username', localStorage.getItem('cl_session')).single();
 if (!profile) { updateNav(); showPage('auth'); return; }
-currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.displayname, avatar: profile.avatar, isAdmin: profile.isadmin };
+currentUser = { supabaseId: profile.id, username: profile.username, 
+display_name: profile.display_name, avatar: profile.avatar, is_admin: profile.is_admin };
 updateNav();
 showPage('dashboard');
 }
