@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- 11-->
+<meta charset="UTF-8"><!-- 12-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CigarLog</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -234,12 +234,16 @@ window.supaReady = false;
 <!-- MESSAGES PAGE -->
 <div id="page-messages" class="page">
   <div style="max-width:700px;margin:0 auto;padding:40px 20px;">
-    <button class="btn btn-secondary" onclick="event.stopPropagation();showPage('dashboard');" style="margin-bottom:24px;">&larr; Back</button>    <div style="background:white;border-radius:20px;padding:28px;box-shadow:0 4px 30px var(--shadow);">
+    <button class="btn btn-secondary" onclick="event.stopPropagation();showPage('dashboard');" style="margin-bottom:24px;">&larr; Back</button>
+    <div style="background:white;border-radius:20px;padding:28px;box-shadow:0 4px 30px var(--shadow);">
       <h2 style="font-family:'Playfair Display',serif;color:var(--dark-tobacco);margin-bottom:20px;">Community Feed</h2>
-      <div style="display:flex;gap:10px;margin-bottom:20px;">
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
         <input type="text" id="feedInput" class="form-input" placeholder="Share a smoke, a thought..." style="flex:1;">
+        <label for="feedPhoto" style="cursor:pointer;background:var(--cream);border:1.5px solid var(--light-ash);border-radius:12px;padding:10px 14px;font-size:1.1rem;" title="Attach photo">📷</label>
+        <input type="file" id="feedPhoto" accept="image/*" style="display:none;" onchange="previewFeedPhoto(this)">
         <button class="btn btn-primary" onclick="postToFeed()">Post</button>
-      </div>
+      </div><!-- ← this was missing -->
+      <img id="feedPhotoPreview" src="" style="display:none;max-width:100%;border-radius:10px;max-height:150px;object-fit:cover;margin-bottom:10px;">
       <div id="feedPosts"></div>
     </div>
   </div>
@@ -915,9 +919,30 @@ async function renderFeed() {
 async function postToFeed() {
   var input = document.getElementById("feedInput");
   var text = input ? input.value.trim() : "";
-  if (!text || !currentUser) return;
-  var { error } = await supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.display_name || currentUser.username, text: text });
-  if (!error) { input.value = ""; renderFeed(); } else showToast("Could not post.");
+  var fileInput = document.getElementById("feedPhoto");
+  var file = fileInput && fileInput.files[0];
+  if (!text && !file) { showToast("Add a message or photo to post."); return; }
+  if (!currentUser) return;
+  var photoUrl = null;
+  if (file) {
+    showToast("Uploading photo...");
+    photoUrl = await uploadPhoto(file, "feed");
+  }
+  var { error } = await supa.from("feed_posts").insert({ 
+    user_id: currentUser.supabaseId, 
+    username: currentUser.displayName || currentUser.username, 
+    text: text || null,
+    photo_url: photoUrl
+  });
+  if (!error) { 
+    input.value = ""; 
+    if (fileInput) fileInput.value = "";
+    var preview = document.getElementById("feedPhotoPreview");
+    if (preview) { preview.src = ""; preview.style.display = "none"; }
+    renderFeed(); 
+  } else { 
+    showToast("Could not post."); 
+  }
 }
 
 // ── SIDEBAR MESSAGES ──────────────────────────────────────────────────────────
@@ -929,6 +954,19 @@ async function renderSidebarFeed() {
   posts.forEach(function(p) { appendSidebarPost(p); });
   div.scrollTop = div.scrollHeight;
 }
+
+function previewFeedPhoto(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var preview = document.getElementById("feedPhotoPreview");
+      preview.src = e.target.result;
+      preview.style.display = "block";
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
 
 function appendSidebarPost(post) {
   var div = document.getElementById("sidebarFeedPosts"); if (!div) return;
