@@ -138,6 +138,7 @@ window._supaReady = false;
       <div id="regError" style="font-size:0.82rem;margin-top:10px;text-align:center;color:var(--band-red)"></div>
       <div class="auth-toggle">Already a member? <a onclick="showAuthForm('login')">Sign in &rarr;</a></div>
     </div><!-- end form-register -->
+
   </div><!-- end auth-card -->
 </div><!-- end page-auth -->
 
@@ -346,8 +347,10 @@ async function doRegister() {
   var p   = document.getElementById("regPassword").value;
   var err = document.getElementById("regError");
   err.textContent = "";
-  if (!u || !p || !dn) { err.textContent = "All fields required."; return; }
-  if (p.length < 6)    { err.textContent = "Password must be 6+ characters."; return; }
+  const inviteCode = document.getElementById("regInviteCode").value.trim();
+  if (!inviteCode) { err.textContent = "A valid invite link is required to register."; return; }
+  if (!u || !p) { err.textContent = "All fields required."; return; }
+  if (p.length < 6) { err.textContent = "Password must be 6+ characters."; return; }
   var btn = document.getElementById("regBtn");
   btn.textContent = "Creating..."; btn.disabled = true;
   var result = await _supa.auth.signUp({ email: u + "@cigarlog.app", password: p });
