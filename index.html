@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- 19-->
+<meta charset="UTF-8"><!-- 20 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CigarLog</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -169,24 +169,6 @@ window.supaReady = false;
             <input id="sidebarFeedFile" type="file" accept="image/*" style="display:none;" onchange="postSidebarFeed()">
             <label for="sidebarFeedCam" style="cursor:pointer;font-size:1.1rem;" title="Camera">&#128247;</label>
             <input id="sidebarFeedCam" type="file" accept="image/*" capture="environment" style="display:none;" onchange="postSidebarFeed()">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-      <div style="display:flex;flex-direction:column;height:100%;background:white;border-radius:16px;box-shadow:0 3px 15px var(--shadow);overflow:hidden;">
-        <div id="sidebarFeedPosts" style="flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:6px;"></div>
-        <div style="padding:8px 10px;border-top:1px solid var(--light-ash);display:flex;align-items:center;gap:6px;flex-shrink:0;">
-          <div style="flex:1;display:flex;align-items:center;background:var(--cream);border:1.5px solid var(--light-ash);border-radius:20px;padding:6px 12px;gap:6px;">
-            <input id="sidebarFeedInput" type="text" placeholder="Message..."
-              style="flex:1;background:none;border:none;outline:none;color:var(--charcoal);font-size:0.88rem;font-family:'Lato',sans-serif;"
-              onkeydown="if(event.key==='Enter'){event.preventDefault();postSidebarFeed();}">
-            <label for="sidebarFeedFile" style="cursor:pointer;font-size:1.1rem;" title="Attach">&#128206;</label>
-            <input id="sidebarFeedFile" type="file" accept="image/*" style="display:none;">
-            <label for="sidebarFeedCam" style="cursor:pointer;font-size:1.1rem;" title="Camera">&#128247;</label>
-            <input id="sidebarFeedCam" type="file" accept="image/*" capture="environment" style="display:none;">
           </div>
         </div>
       </div>
@@ -938,10 +920,10 @@ async function postToFeed() {
     photoUrl = await uploadPhoto(file, "feed");
   }
   var { error } = await supa.from("feed_posts").insert({ 
-    user_id: currentUser.supabaseId, 
+    userid: currentUser.supabaseId, 
     username: currentUser.displayName || currentUser.username, 
     text: text || null,
-    photo_url: photoUrl
+    photourl: photoUrl
   });
   if (!error) { 
     input.value = ""; 
