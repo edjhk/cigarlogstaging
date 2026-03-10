@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- 20 -->
+<meta charset="UTF-8"><!-- 21 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CigarLog</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -1028,17 +1028,19 @@ async function postSidebarFeed() {
   if (file) {
     showToast("Uploading...");
     photoUrl = await uploadPhoto(file, "feed");
+    console.log("photoUrl:", photoUrl);
     if (!photoUrl) { showToast("Upload failed."); return; }
     if (fileInput) fileInput.value = "";
     if (camInput) camInput.value = "";
   }
   if (input) input.value = "";
-  await supa.from("feed_posts").insert({ 
-    user_id: currentUser.supabaseId, 
-    username: currentUser.displayName || currentUser.username, 
-    text: text || null, 
-    photo_url: photoUrl 
-  });
+  var { data, error } = await supa.from("feed_posts").insert({
+    userid: currentUser.supabaseId,
+    username: currentUser.displayName || currentUser.username,
+    text: text || null,
+    photourl: photoUrl
+  }).select();
+  console.log("insert result:", data, "error:", error);
   renderSidebarFeed();
 }
 
