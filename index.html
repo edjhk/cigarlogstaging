@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- 26 -->
+<meta charset="UTF-8"><!-- 27 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CigarLog</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -1271,9 +1271,9 @@ async function renderReviews() {
   if (!div) return;
   div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:20px;">Loading...</div>';
   if (currentReviewTab === 'latest') {
-    var { data: logs } = await supa.from('cigarlogs').select().order('datesmoked', { ascending: false }).limit(50);
-    if (!logs || !logs.length) { div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px;">No reviews yet.</div>'; return; }
-    div.innerHTML = logs.map(l => `
+    var { data: toplogs } = await supa.from('cigarlogs').select().order('datesmoked', { ascending: false }).limit(50);
+    if (!toplogs || !toplogs.length) { div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px;">No reviews yet.</div>'; return; }
+    div.innerHTML = toplogs.map(l => `
       <div style="background:white;border-radius:12px;box-shadow:0 2px 8px var(--shadow);padding:10px 12px;margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <strong style="color:var(--dark-tobacco);">${l.cigarname}</strong>
@@ -1285,10 +1285,10 @@ async function renderReviews() {
       </div>
     `).join('');
   } else {
-    var { data: logs } = await supa.from('cigarlogs').select('cigarname, brand, rating');
-    if (!logs || !logs.length) { div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px;">No reviews yet.</div>'; return; }
+    var { data: toplogs } = await supa.from('cigarlogs').select('cigarname, brand, rating');
+    if (!rankedlogs || !rankedlogs.length) { div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px;">No reviews yet.</div>'; return; }
     var grouped = {};
-    logs.forEach(l => {
+    rankedlogs.forEach(l => {
       if (!grouped[l.cigarname]) grouped[l.cigarname] = { brand: l.brand, ratings: [] };
       if (l.rating) grouped[l.cigarname].ratings.push(l.rating);
     });
