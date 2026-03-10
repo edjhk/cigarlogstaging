@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- V6 -->
+<meta charset="UTF-8"><!-- V4 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CigarLog</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -78,7 +78,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // Ensure supabase library is available before any code runs
-window._supaReady = false;
+window.supaReady = false;
 </script>
 </head>
 <body>
@@ -309,12 +309,12 @@ function initSupa() {
   );
   return supa;
 }
-var _supa = initSupa();
-console.log("_supa initialized:", _supa ? "yes" : "FAILED");
+var supa = initSupa();
+console.log("supa initialized:", supa ? "yes" : "FAILED");
 var currentUser = null;
 var caDatabase  = [];
 var logSelectedCigar = null;
-var _feedChannel = null;
+var feedchannel = null;
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 async function doLogin() {
@@ -380,7 +380,7 @@ async function doRegister() {
 function doLogout() {
   localStorage.removeItem("cl_session");
   currentUser = null;
-  if (_feedChannel) { _supa.removeChannel(_feedChannel); _feedChannel = null; }
+  if (feedchannel) { supa.removeChannel(feedchannel); feedchannel = null; }
   updateNav();
   showPage("auth");
 }
@@ -477,7 +477,7 @@ function showPage(page) {
   if (!t) { console.warn("showPage: no element found for page-" + page); return; }
   t.classList.add("active");
   history.pushState({ page: page }, '', '#' + page);
-  if (page === "dashboard")  { renderDashboard(); renderSidebarFeed(); if (!_feedChannel) subscribeToFeed(); }
+  if (page === "dashboard")  { renderDashboard(); renderSidebarFeed(); if (!feedchannel) subscribeToFeed(); }
   if (page === "messages")   { renderFeed(); }
   if (page === "invite")     { renderInviteList(); }
   if (page === "settings" && currentUser && currentUser.isAdmin) renderAdminPanel();
@@ -518,16 +518,16 @@ function compressImage(file, maxPx, quality) {
 async function uploadPhoto(file, folder) {
   var blob = await compressImage(file, 1200, 0.82);
   var path = (folder || "feed") + "/" + Date.now() + "_" + Math.random().toString(36).slice(2) + ".jpg";
-  var { error } = await _supa.storage.from("photos").upload(path, blob, { contentType: "image/jpeg" });
+  var { error } = await supa.storage.from("photos").upload(path, blob, { contentType: "image/jpeg" });
   if (error) { console.error("Upload:", error.message); return null; }
-  return _supa.storage.from("photos").getPublicUrl(path).data.publicUrl;
+  return supa.storage.from("photos").getPublicUrl(path).data.publicUrl;
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
 async function renderDashboard() {
   console.log("renderDashboard called, currentUser:", currentUser);
   if (!currentUser || !currentUser.supabaseId) return;
-  var { data: mine, error: dashError } = await _supa.from("cigar_logs").select("*")
+  var { data: mine, error: dashError } = await supa.from("cigar_logs").select("*")
     .eq("user_id", currentUser.supabaseId).order("date_smoked", { ascending: false });
   console.log("cigar_logs result:", mine, "error:", dashError);
   mine = mine || [];
@@ -592,7 +592,7 @@ async function submitLog() {
   var f1 = document.getElementById("logPhoto").files[0];
   var f2 = document.getElementById("logPhotoCamera").files[0];
   if (f1 || f2) { showToast("Uploading photo..."); photoUrl = await uploadPhoto(f1 || f2, "logs"); }
-  var { error } = await _supa.from("cigar_logs").insert({
+  var { error } = await supa.from("cigar_logs").insert({
     user_id: currentUser.supabaseId, cigar_name: logSelectedCigar.cigar.name,
     brand: logSelectedCigar.brand, family: logSelectedCigar.family,
     size: logSelectedCigar.cigar.size || null, shape: logSelectedCigar.cigar.shape || null,
@@ -707,7 +707,7 @@ async function selectCigar(brandName, familyName, cigarName) {
 
   // Fetch CigarLog community average
   var clScore = "Not yet reviewed";
-  var { data: logs } = await _supa.from("cigar_logs").select("rating")
+  var { data: logs } = await supa.from("cigar_logs").select("rating")
     .eq("cigar_name", cigarName).eq("brand", brandName);
   if (logs && logs.length) {
     var avg = logs.reduce(function(sum, r) { return sum + r.rating; }, 0) / logs.length;
@@ -886,7 +886,7 @@ function selectLogCigar(brandName, familyName, cigarName) {
 async function renderFeed() {
   var div = document.getElementById("feedPosts"); if (!div) return;
   div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:20px;'>Loading...</div>";
-  var { data: posts } = await _supa.from("feed_posts").select("*").order("created_at", { ascending: false }).limit(50);
+  var { data: posts } = await supa.from("feed_posts").select("*").order("created_at", { ascending: false }).limit(50);
   posts = posts || [];
   if (!posts.length) { div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:30px;'>No posts yet.</div>"; return; }
   div.innerHTML = posts.map(function(p) {
@@ -905,14 +905,14 @@ async function postToFeed() {
   var input = document.getElementById("feedInput");
   var text = input ? input.value.trim() : "";
   if (!text || !currentUser) return;
-  var { error } = await _supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text });
+  var { error } = await supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text });
   if (!error) { input.value = ""; renderFeed(); } else showToast("Could not post.");
 }
 
 // ── SIDEBAR MESSAGES ──────────────────────────────────────────────────────────
 async function renderSidebarFeed() {
   var div = document.getElementById("sidebarFeedPosts"); if (!div) return;
-  var { data: posts } = await _supa.from("feed_posts").select("*").order("created_at", { ascending: true }).limit(60);
+  var { data: posts } = await supa.from("feed_posts").select("*").order("created_at", { ascending: true }).limit(60);
   div.innerHTML = "";
   if (!posts || !posts.length) { div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:20px;font-size:0.85rem;'>No messages yet.</div>"; return; }
   posts.forEach(function(p) { appendSidebarPost(p); });
@@ -969,8 +969,8 @@ function appendSidebarPost(post) {
 
 
 function subscribeToFeed() {
-  if (_feedChannel) _supa.removeChannel(_feedChannel);
-  _feedChannel = _supa.channel("feed_realtime")
+  if (feedchannel) supa.removeChannel(feedchannel);
+  feedchannel = supa.channel("feed_realtime")
     .on("postgres_changes", { event: "INSERT", schema: "public", table: "feed_posts" }, function(payload) {
       appendSidebarPost(payload.new);
     }).subscribe();
@@ -981,7 +981,7 @@ async function postSidebarFeed() {
   var text = input ? input.value.trim() : "";
   if (!text || !currentUser) return;
   input.value = "";
-  await _supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text });
+  await supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text });
   appendSidebarPost({ username: currentUser.displayName || currentUser.username, text: text, photo_url: null, created_at: new Date().toISOString() });
 
 }
@@ -992,7 +992,7 @@ async function postSidebarMedia(fileInput) {
   var url = await uploadPhoto(fileInput.files[0], "feed");
   fileInput.value = "";
   if (!url) { showToast("Upload failed."); return; }
-  await _supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: "", photo_url: url });
+  await supa.from("feed_posts").insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: "", photo_url: url });
 }
 
 // ── INVITES ───────────────────────────────────────────────────────────────────
@@ -1001,7 +1001,7 @@ async function generateInvite() {
   if (!name) { showToast('Please enter a name for the invite.'); return; }
   var token = Math.random().toString(36).substring(2,10).toUpperCase();
   var expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-  var { error } = await _supa.from('invites').insert({
+  var { error } = await supa.from('invites').insert({
     invited_by: currentUser.supabaseId,
     invited_name: name,
     invited_email: '',
@@ -1019,7 +1019,7 @@ async function generateInvite() {
 async function regenerateInvite(oldId, name) {
   var token = Math.random().toString(36).substring(2,10).toUpperCase();
   var expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-  var { error } = await _supa.from('invites').update({
+  var { error } = await supa.from('invites').update({
     token: token,
     used: false,
     expires_at: expires_at,
@@ -1041,7 +1041,7 @@ function copyInviteLink() {
 async function renderInviteList() {
   var div = document.getElementById('inviteList');
   if (!div || !currentUser) return;
-  var { data: invites } = await _supa.from('invites').select('*')
+  var { data: invites } = await supa.from('invites').select('*')
     .eq('invited_by', currentUser.supabaseId)
     .order('created_at', { ascending: false });
   if (!invites || !invites.length) {
@@ -1110,7 +1110,7 @@ async function renderAdminPanel() {
 async function renderAdminUsers() {
   var uDiv = document.getElementById('adminUsers');
   uDiv.innerHTML = '<div style="color:var(--ash);padding:12px;">Loading...</div>';
-  var { data: users } = await _supa.from('profiles').select().order('created_at');
+  var { data: users } = await supa.from('profiles').select().order('created_at');
   uDiv.innerHTML = '';
   if (!users || !users.length) { uDiv.innerHTML = '<div style="color:var(--ash);">No users found.</div>'; return; }
   users.forEach(function(u) {
@@ -1118,11 +1118,11 @@ async function renderAdminUsers() {
     row.className = 'admin-item';
     row.innerHTML = `
       <div>
-        <div style="font-weight:700;font-size:0.92rem;">${u.display_name || u.username}</div>
+        <div style="font-weight:700;font-size:0.92rem;">${u.displayname || u.username}</div>
         <div style="font-size:0.75rem;color:var(--ash);">@${u.username} · ${u.email || 'no email'} · joined ${u.created_at ? new Date(u.created_at).toLocaleDateString() : '?'}</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
-        ${u.email ? `<button class="admin-btn" style="background:var(--tobacco);" onclick="sendPasswordReset('${u.email}','${u.display_name||u.username}')">Reset PW</button>` : ''}
+        ${u.email ? `<button class="admin-btn" style="background:var(--tobacco);" onclick="sendPasswordReset('${u.email}','${u.displayname||u.username}')">Reset PW</button>` : ''}
         <button class="admin-btn" onclick="deleteUser('${u.id}')">Delete</button>
       </div>`;
     uDiv.appendChild(row);
@@ -1132,7 +1132,7 @@ async function renderAdminUsers() {
 async function renderAdminMessages() {
   var pDiv = document.getElementById('adminFeed');
   pDiv.innerHTML = '<div style="color:var(--ash);padding:12px;">Loading...</div>';
-  var { data: posts } = await _supa.from('feedposts').select().order('created_at', { ascending: false }).limit(50);
+  var { data: posts } = await supa.from('feedposts').select().order('created_at', { ascending: false }).limit(50);
   pDiv.innerHTML = '';
   if (!posts || !posts.length) { pDiv.innerHTML = '<div style="color:var(--ash);">No messages.</div>'; return; }
   posts.forEach(function(p) {
@@ -1151,7 +1151,7 @@ async function renderAdminMessages() {
 
 async function deleteUser(id) {
   if (!confirm('Delete this user?')) return;
-  var { error } = await _supa.from('profiles').delete().eq('id', id);
+  var { error } = await supa.from('profiles').delete().eq('id', id);
   if (error) { showToast('Error: ' + error.message); return; }
   showToast('User deleted');
   renderAdminUsers();
@@ -1159,7 +1159,7 @@ async function deleteUser(id) {
 
 async function deletePost(id) {
   if (!confirm('Delete this message?')) return;
-  await _supa.from('feedposts').delete().eq('id', id);
+  await supa.from('feedposts').delete().eq('id', id);
   showToast('Message deleted');
   renderAdminMessages();
   renderSidebarFeed();
@@ -1167,7 +1167,7 @@ async function deletePost(id) {
 
 async function sendPasswordReset(email, name) {
   if (!confirm('Send password reset email to ' + name + '?')) return;
-  var { error } = await _supa.auth.resetPasswordForEmail(email, {
+  var { error } = await supa.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin + window.location.pathname
   });
   if (error) { showToast('Error: ' + error.message); return; }
@@ -1204,7 +1204,7 @@ async function init() {
   const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
   const inviteToken = hashParams.get('invite');
   if (inviteToken) {
-    const { data: inv } = await _supa.from('invites').select().eq('token', inviteToken).single();
+    const { data: inv } = await supa.from('invites').select().eq('token', inviteToken).single();
     if (inv && !inv.used && new Date(inv.expires_at) > new Date()) {
       updateNav();
       showPage('auth');
@@ -1221,16 +1221,15 @@ async function init() {
     }
     return;
   }
-  // Check session
-  console.log("checking session...");
-  var session = localStorage.getItem('cl_session');
-  console.log("session value:", session);
-  if (!session) { updateNav(); showPage('auth'); return; }
-  var { data: profile } = await _supa.from('profiles').select().eq('username', session).single();
-  if (!profile) { updateNav(); showPage('auth'); return; }
-  currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.display_name, avatar: profile.avatar, isAdmin: profile.is_admin };
-  updateNav();
-  showPage('dashboard');
+// Check session
+console.log("checking session...");
+var { data: { session: authSession } } = await supa.auth.getSession();
+if (!authSession) { updateNav(); showPage('auth'); return; }
+var { data: profile } = await supa.from('profiles').select().eq('username', localStorage.getItem('cl_session')).single();
+if (!profile) { updateNav(); showPage('auth'); return; }
+currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.displayname, avatar: profile.avatar, isAdmin: profile.isadmin };
+updateNav();
+showPage('dashboard');
 }
 init();
 </script>
