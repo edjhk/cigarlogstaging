@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><!-- 18-->
+<meta charset="UTF-8"><!-- 19-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CigarLog</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -542,9 +542,9 @@ function compressImage(file, maxPx, quality) {
 async function uploadPhoto(file, folder) {
   var blob = await compressImage(file, 1200, 0.82);
   var path = (folder || "feed") + "/" + Date.now() + "_" + Math.random().toString(36).slice(2) + ".jpg";
-  var { error } = await supa.storage.from("photos").upload(path, blob, { contentType: "image/jpeg" });
+  var { error } = await supa.storage.from("Photos").upload(path, blob, { contentType: "image/jpeg" });
   if (error) { console.error("Upload:", error.message); return null; }
-  return supa.storage.from("photos").getPublicUrl(path).data.publicUrl;
+  return supa.storage.from("Photos").getPublicUrl(path).data.publicUrl;
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────────────────────
