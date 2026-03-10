@@ -318,6 +318,7 @@ var _feedChannel = null;
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 async function doLogin() {
+async function doLogin() {
   var u   = document.getElementById("loginUsername").value.trim().toLowerCase();
   var p   = document.getElementById("loginPassword").value;
   var err = document.getElementById("loginError");
@@ -325,16 +326,22 @@ async function doLogin() {
   if (!u || !p) { err.textContent = "Username and password required."; return; }
   var btn = document.getElementById("loginBtn");
   btn.textContent = "Signing in..."; btn.disabled = true;
-  var { data, error } = await _supa.auth.signInWithPassword({ email: u + "@cigarlog.app", password: p });
+
+  // Look up profile first to get real email
+  var { data: profile } = await supa.from("profiles").select().eq("username", u).single();
+  if (!profile) { err.textContent = "User not found."; btn.textContent = "Sign In"; btn.disabled = false; return; }
+
+  // Sign in with real email from profile
+  var { data, error } = await supa.auth.signInWithPassword({ email: profile.email, password: p });
   if (error) { err.textContent = error.message; btn.textContent = "Sign In"; btn.disabled = false; return; }
-  var { data: profile } = await _supa.from("profiles").select().eq("username", u).single();
-  if (!profile) { err.textContent = "Profile not found."; btn.textContent = "Sign In"; btn.disabled = false; return; }
-  currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.displayname, avatar: profile.avatar, isAdmin: profile.is.admin };
+
+  currentUser = { supabaseId: profile.id, username: profile.username, displayName: profile.displayname, avatar: profile.avatar, isAdmin: profile.isadmin };
   localStorage.setItem("cl_session", u);
   btn.textContent = "Sign In"; btn.disabled = false;
   updateNav();
   showPage("dashboard");
 }
+
 
 function showAuthForm(which) {
   document.getElementById("form-login").classList.toggle("hidden", which !== "login");
@@ -354,14 +361,14 @@ async function doRegister() {
   var btn = document.getElementById("regBtn");
   btn.textContent = "Creating..."; btn.disabled = true;
   var email = document.getElementById("regEmail").value.trim();
-  var result = await _supa.auth.signUp({ email: email, password: p });
+  var result = await supa.auth.signUp({ email: email, password: p });
   console.log("signUp result:", result.data, result.error);
   if (result.error) { err.textContent = result.error.message; btn.textContent = "Create Account"; btn.disabled = false; return; }
-  await _supa.from("profiles").insert({ user_id: result.data.user.id, username: u, displayname: dn, avatar: "", isadmin: false });
+  await supa.from("profiles").insert({ user_id: result.data.user.id, username: u, displayname: dn, avatar: "", isadmin: false });
   // Mark invite as used if one was provided
   const usedToken = document.getElementById('regInviteCode').value.trim();
   if (usedToken) {
-    await _supa.from('invites')
+    await supa.from('invites')
       .update({ used: true, accepted_by: result.data.user.id })
       .eq('token', usedToken);
   }
