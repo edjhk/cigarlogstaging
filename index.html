@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 64 -->
+ <meta charset="UTF-8"><!-- 65 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -16,8 +16,9 @@
   --success:#4A7C59; --shadow:rgba(44,36,24,0.15); --radius:16px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal);min-height:100vh;}
+body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal);min-height:100vh;overflow-x:hidden;}
 .page{display:none;} .page.active{display:block;} .hidden{display:none!important;}
+.page.active { position: relative; z-index: 1;}
 .nav{background:var(--charcoal);padding:0 20px;height:64px;display:flex;align-items:center;
   justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(44,36,24,0.3);}
 .nav-logo{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.5rem;font-weight:700;cursor:pointer;}
