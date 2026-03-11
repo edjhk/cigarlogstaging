@@ -1,7 +1,7 @@
 Feed<!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 56 -->
+ <meta charset="UTF-8"><!-- 57 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -601,9 +601,11 @@ function showPage(page) {
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
   var activePage = document.getElementById('page-' + page);
-  if (activePage) activePage.scrollTop = 0;
+  if (activePage) {
+    activePage.scrollTop = 0;
+    setTimeout(function() { activePage.scrollTop = 0; }, 50);
+  }
 }
-
 // ── CIGAR JSON ────────────────────────────────────────────────────────────────
 async function loadCA() {
   try {
