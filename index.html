@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 46 -->
+ <meta charset="UTF-8"><!-- 47 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -17,6 +17,7 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal);min-height:100vh;}
 .page{display:none;} .page.active{display:block;} .hidden{display:none!important;}
+#page-feed.active{display:flex;}
 .nav{background:var(--charcoal);padding:0 20px;height:64px;display:flex;align-items:center;
   justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(44,36,24,0.3);}
 .nav-logo{font-family:'Playfair Display',serif;color:var(--gold);font-size:1.5rem;font-weight:700;cursor:pointer;}
@@ -1196,6 +1197,8 @@ async function renderFeedPage() {
   if (!div) return;
   div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:20px;">Loading...</div>';
   var { data: posts } = await supa.from('feedposts').select().order('created_at', { ascending: true }).limit(50);
+  var { data: posts } = await supa.from('feedposts').select().order('created_at', { ascending: true }).limit(50);
+  console.log('feed posts:', posts);
   if (!posts || !posts.length) {
     div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px;">No posts yet. Be the first!</div>';
     return;
