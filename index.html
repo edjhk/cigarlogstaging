@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 59 -->
+ <meta charset="UTF-8"><!-- 60 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1005,54 +1005,6 @@ function selectLogCigar(brandName, familyName, cigar_name) {
   document.getElementById("logSelectedCigar").style.display = "block";
 }
 
-// ── COMMUNITY FEED ────────────────────────────────────────────────────────────
-async function renderFeedPage() {
-  var div = document.getElementById("feedPosts"); if (!div) return;
-  div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:20px;'>Loading...</div>";
-  var { data: posts } = await supa.from('feed_posts').select().order('created_at', { ascending: true }).limit(50);
-  posts = posts || [];
-  if (!posts.length) { div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:30px;'>No posts yet.</div>"; return; }
-  div.innerHTML = posts.map(function(p) {
-    return "<div style='padding:14px 0;border-bottom:1px solid var(--light-ash);'>"
-      + "<div style='display:flex;justify-content:space-between;margin-bottom:4px;'>"
-      + "<strong style='color:var(--dark-tobacco);'>" + (p.username || "Unknown") + "</strong>"
-      + "<span style='font-size:0.75rem;color:var(--ash);'>" + new Date(p.created_at).toLocaleDateString() + "</span>"
-      + "</div>"
-      + (p.photo_url ? "<img src='" + p.photo_url + "' style='max-width:100%;border-radius:8px;margin-bottom:6px;'>" : "")
-      + "<div style='color:var(--charcoal);font-size:0.92rem;'>" + (p.text || "") + "</div>"
-      + "</div>";
-  }).join("");
-}
-
-async function postToFeed() {
-  var input = document.getElementById("feedInput");
-  var text = input ? input.value.trim() : "";
-  var fileInput = document.getElementById("feedPhoto");
-  var file = fileInput && fileInput.files[0];
-  if (!text && !file) { showToast("Add a message or photo to post."); return; }
-  if (!currentUser) return;
-  var photo_url = null;
-  if (file) {
-    showToast("Uploading photo...");
-    photo_url = await uploadPhoto(file, "feed");
-  }
-  var { error } = await supa.from("feed_posts").insert({ 
-    userid: currentUser.supabaseId, 
-    username: currentUser.displayName || currentUser.username, 
-    text: text || null,
-    photo_url: photo_url
-  });
-  if (!error) { 
-    input.value = ""; 
-    if (fileInput) fileInput.value = "";
-    var preview = document.getElementById("feedPhotoPreview");
-    if (preview) { preview.src = ""; preview.style.display = "none"; }
-    renderFeedPage(); 
-  } else { 
-    showToast("Could not post."); 
-  }
-}
-
 // ── SIDEBAR MESSAGES ──────────────────────────────────────────────────────────
 async function renderSidebarFeed() {
   var div = document.getElementById("sidebarFeedPosts"); if (!div) return;
@@ -1249,11 +1201,11 @@ async function postToFeedPage() {
   if (!text && !file) return;
   if (!currentUser) return;
   var photo_url = null;
-  if (file) { showToast('Uploading...'); photo_url = await uploadPhoto(file, 'feed'); if (!photo_Url) { showToast('Upload failed.'); return; } }
+  if (file) { showToast('Uploading...'); photo_url = await uploadPhoto(file, 'feed'); if (!photo_url) { showToast('Upload failed.'); return; } }
   if (fileInput) fileInput.value = '';
   if (camInput) camInput.value = '';
   if (input) input.value = '';
-  await supa.from('feed_posts').insert({ userid: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text || null, photo_url: photoUrl });
+  await supa.from('feed_posts').insert({ userid: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text || null, photo_url: photo_url });
   renderFeedPage();
 }
 
