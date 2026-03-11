@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 38 -->
+ <meta charset="UTF-8"><!-- 39 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1107,7 +1107,7 @@ async function appendSidebarPost(post) {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + (await supa.auth.getSession()).data.session.access_token
+              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZscnFoaXZ2amltYWhmcmRveHd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODkyNzUsImV4cCI6MjA4ODQ2NTI3NX0.3PoCVkRGM3fLyu0MXsaz4ZKH1zsuoHVcKUZpciOAAk'
             },
             body: JSON.stringify({ url: part })
           })
@@ -1230,7 +1230,7 @@ async function renderFeedPage() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZscnFoaXZ2amltYWhmcmRveHd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODkyNzUsImV4cCI6MjA4ODQ2NTI3NX0.3PoCVkRGM3fLyu0MXsaz4ZKH1zsuoHVcKUZpciOAAk'
       },
       body: JSON.stringify({ url })
     }).then(r => r.json()).then(r => {
