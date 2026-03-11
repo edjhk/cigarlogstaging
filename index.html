@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 35 -->
+ <meta charset="UTF-8"><!-- 36 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1215,6 +1215,7 @@ async function renderFeedPage() {
     var urlMatch = p.text.match(/https?:\/\/[^\s]+/);
     if (!urlMatch) return;
     var url = urlMatch[0];
+    console.log('Link preview fetching:', url);
     var card = document.createElement('div');
     card.style.cssText = 'margin-top:8px;border-radius:10px;overflow:hidden;border:1px solid var(--light-ash);cursor:pointer;max-width:100%;';
     card.onclick = () => window.open(url, '_blank');
