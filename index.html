@@ -1,7 +1,7 @@
 Feed<!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 54 -->
+ <meta charset="UTF-8"><!-- 55 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1003,7 +1003,7 @@ function selectLogCigar(brandName, familyName, cigarName) {
 }
 
 // ── COMMUNITY FEED ────────────────────────────────────────────────────────────
-async function renderFeed() {
+async function renderFeedPage() {
   var div = document.getElementById("feedPosts"); if (!div) return;
   div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:20px;'>Loading...</div>";
   var { data: posts } = await supa.from('feed_posts').select().order('created_at', { ascending: true }).limit(50);
@@ -1044,7 +1044,7 @@ async function postToFeed() {
     if (fileInput) fileInput.value = "";
     var preview = document.getElementById("feedPhotoPreview");
     if (preview) { preview.src = ""; preview.style.display = "none"; }
-    renderFeed(); 
+    renderFeedPage(); 
   } else { 
     showToast("Could not post."); 
   }
