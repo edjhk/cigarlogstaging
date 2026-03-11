@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 36 -->
+ <meta charset="UTF-8"><!-- 37 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1083,7 +1083,7 @@ function previewFeedPhoto(input) {
 }
 
 
-function appendSidebarPost(post) {
+async function appendSidebarPost(post) {
   var div = document.getElementById("sidebarFeedPosts"); if (!div) return;
   var isMe = currentUser && post.username === (currentUser.display_name || currentUser.username);
   var wrap = document.createElement("div");
@@ -1093,7 +1093,7 @@ function appendSidebarPost(post) {
   if (post.photo_url) { var img = document.createElement("img"); img.src = post.photo_url; img.style.cssText = "max-width:140px;border-radius:8px;margin-bottom:3px;display:block;"; bubble.appendChild(img); }
   if (post.text) {
     if (/(https?:\/\/[^\s]+)/g.test(post.text)) {
-      post.text.split(/(https?:\/\/[^\s]+)/g).forEach(function(part) {
+      post.text.split(/(https?:\/\/[^\s]+)/g).forEach(async function(part) {
         if (/^https?:\/\//.test(part)) {
           var a = document.createElement('a');
           a.href = part; a.textContent = part; a.target = '_blank';
@@ -1105,9 +1105,13 @@ function appendSidebarPost(post) {
           bubble.appendChild(card);
           fetch('https://flrqhivvjimahfrdoxwt.supabase.co/functions/v1/link-preview', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZscnFoaXZ2amltYWhmcmRveHd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODkyNzUsImV4cCI6MjA4ODQ2NTI3NX0.3PoCVkRGM3fLyu0MXsaz4ZKH1zsuo_HVcKUZpciOAAk' },
-            body: JSON.stringify({ url: part })
-          }).then(function(res) { return res.json(); }).then(function(r) {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + (await supa.auth.getSession()).data.session.access_token
+            },
+            body: JSON.stringify({ url })
+          })
+          .then(function(res) { return res.json(); }).then(function(r) {
             if (!r || r.error) return;
             card.innerHTML =
               (r.image ? '<img src="'+r.image+'" style="width:100%;max-height:130px;object-fit:cover;display:block;">' : '') +
