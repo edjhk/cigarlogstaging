@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 37 -->
+ <meta charset="UTF-8"><!-- 38 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1109,7 +1109,7 @@ async function appendSidebarPost(post) {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer ' + (await supa.auth.getSession()).data.session.access_token
             },
-            body: JSON.stringify({ url })
+            body: JSON.stringify({ url: part })
           })
           .then(function(res) { return res.json(); }).then(function(r) {
             if (!r || r.error) return;
@@ -1212,6 +1212,9 @@ async function renderFeedPage() {
   `).join('');
 
   // Link previews — inside the function where posts is defined
+  const { data: { session } } = await supa.auth.getSession();
+  const token = session.access_token;
+
   posts.forEach(p => {
     if (!p.text) return;
     var el = document.getElementById('feedpost-' + p.id);
@@ -1219,7 +1222,6 @@ async function renderFeedPage() {
     var urlMatch = p.text.match(/https?:\/\/[^\s]+/);
     if (!urlMatch) return;
     var url = urlMatch[0];
-    console.log('Link preview fetching:', url);
     var card = document.createElement('div');
     card.style.cssText = 'margin-top:8px;border-radius:10px;overflow:hidden;border:1px solid var(--light-ash);cursor:pointer;max-width:100%;';
     card.onclick = () => window.open(url, '_blank');
@@ -1228,7 +1230,7 @@ async function renderFeedPage() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZscnFoaXZ2amltYWhmcmRveHd0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4ODkyNzUsImV4cCI6MjA4ODQ2NTI3NX0.3PoCVkRGM3fLyu0MXsaz4ZKH1zsuoHVcKUZpciOAAk'
+        'Authorization': 'Bearer ' + token
       },
       body: JSON.stringify({ url })
     }).then(r => r.json()).then(r => {
