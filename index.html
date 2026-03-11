@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 51 -->
+ <meta charset="UTF-8"><!-- 52 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -123,26 +123,6 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
     display: none !important;
   }
   /* Add padding so content isn't hidden behind bottom nav */
-@media (max-width: 768px) {
-  #navLinks { display: none !important; }
-  .page.active:not(#page-feed) {
-    display: block;
-    height: calc(100vh - 64px - 60px);
-    overflow-y: auto;
-    padding-bottom: 70px;
-  }
-  #page-feed { display:flex; flex-direction:column; height:calc(100vh - 64px - 60px); padding:0 !important; }
-  .dash-layout { grid-template-columns: 1fr !important; padding: 12px !important; }
-  .dash-sidebar { display: none !important; }
-}
-
-}
-  #page-feed {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 64px - 60px);
-    padding: 0 !important;
-  }
 
   /* Feed as full screen on mobile */
   .dash-layout {
