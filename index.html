@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 45 -->
+ <meta charset="UTF-8"><!-- 46 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -613,7 +613,7 @@ function showPage(page) {
   if (page === "messages")   { renderFeed(); }
   if (page === "invite")     { renderInviteList(); }
   if (page === "settings" && currentUser && currentUser.isadmin) renderAdminPanel();
-  window.scrollTo(0, 0);
+  if (page !== 'feed') window.scrollTo(0, 0);
 }
 
 // ── CIGAR JSON ────────────────────────────────────────────────────────────────
@@ -1163,7 +1163,7 @@ async function postSidebarFeed() {
   }
   if (input) input.value = "";
   var { data, error } = await supa.from("feedposts").insert({
-    user_id: currentUser.supabaseId,
+    userid: currentUser.supabaseId,
     username: currentUser.displayName || currentUser.username,
     text: text || "",
     photo_url: photoUrl
@@ -1206,7 +1206,7 @@ async function renderFeedPage() {
         <strong style="color:var(--dark-tobacco);">${p.username || 'Unknown'}</strong>
         <span style="font-size:0.75rem;color:var(--ash);">${new Date(p.created_at).toLocaleDateString()}</span>
       </div>
-      ${p.photo_url ? `<img src="${p.photo-url}" style="width:100%;border-radius:10px;margin-bottom:6px;max-height:300px;object-fit:cover;">` : ''}
+      ${p.photo_url ? `<img src="${p.photo_url}" style="width:100%;border-radius:10px;margin-bottom:6px;max-height:300px;object-fit:cover;">` : ''}
       ${p.text ? `<div style="color:var(--charcoal);font-size:0.92rem;" id="feedpost-${p.id}">${p.text}</div>` : ''}
     </div>
   `).join('');
