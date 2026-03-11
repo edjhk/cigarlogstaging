@@ -1,7 +1,7 @@
 Feed<!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 53 -->
+ <meta charset="UTF-8"><!-- 54 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -594,7 +594,7 @@ function showPage(page) {
   if (page === 'profile') renderProfile();
   setBottomNav(page);
   if (page === "dashboard")  { renderDashboard(); renderSidebarFeed(); if (!feedchannel) subscribeToFeed(); }
-  if (page === "messages")   { renderFeed(); }
+  if (page === "messages")   { renderFeedPage(); }
   if (page === "invite")     { renderInviteList(); }
   if (page === "settings" && currentUser && currentUser.isadmin) renderAdminPanel();
   window.scrollTo(0, 0);
@@ -1269,7 +1269,7 @@ async function renderReviews() {
   if (!div) return;
   div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:20px;">Loading...</div>';
   if (currentReviewTab === 'latest') {
-    var { data: loglogs } = await supa.from('cigarlogs').select().order('datesmoked', { ascending: false }).limit(50);
+    var { data: loglogs } = await supa.from('cigar_logs').select().order('datesmoked', { ascending: false }).limit(50);
     if (!loglogs || !loglogs.length) { div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px;">No reviews yet.</div>'; return; }
     div.innerHTML = loglogs.map(l => `
       <div style="background:white;border-radius:12px;box-shadow:0 2px 8px var(--shadow);padding:10px 12px;margin-bottom:8px;">
@@ -1283,7 +1283,7 @@ async function renderReviews() {
       </div>
     `).join('');
   } else {
-    var { data: rankedlogs } = await supa.from('cigarlogs').select('cigarname, brand, rating');
+    var { data: rankedlogs } = await supa.from('cigar_logs').select('cigarname, brand, rating');
     if (!rankedlogs || !rankedlogs.length) { div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px;">No reviews yet.</div>'; return; }
     var grouped = {};
     rankedlogs.forEach(l => {
