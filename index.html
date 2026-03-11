@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 50 -->
+ <meta charset="UTF-8"><!-- 51 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -77,6 +77,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
 .admin-btn{background:var(--band-red);color:white;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:0.85rem;}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:white;
   padding:12px 24px;border-radius:30px;font-size:0.92rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);opacity:0;transition:opacity 0.3s;}
+  
 /* BOTTOM NAV */
 .bottom-nav {
   display: none;
@@ -122,10 +123,19 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
     display: none !important;
   }
   /* Add padding so content isn't hidden behind bottom nav */
-.page.active:not(#page-feed) {
-  padding-bottom: 70px;
-  overflow-y: auto;
-  max-height: calc(100vh - 64px - 60px);
+@media (max-width: 768px) {
+  #navLinks { display: none !important; }
+  .page.active:not(#page-feed) {
+    display: block;
+    height: calc(100vh - 64px - 60px);
+    overflow-y: auto;
+    padding-bottom: 70px;
+  }
+  #page-feed { display:flex; flex-direction:column; height:calc(100vh - 64px - 60px); padding:0 !important; }
+  .dash-layout { grid-template-columns: 1fr !important; padding: 12px !important; }
+  .dash-sidebar { display: none !important; }
+}
+
 }
   #page-feed {
     display: flex;
@@ -142,7 +152,6 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
   .dash-sidebar {
     display: none !important;
   }
-}
 /* Desktop nav labels */
 @media (min-width: 769px) {
   .bottom-nav {
@@ -616,7 +625,9 @@ function showPage(page) {
   if (page === "messages")   { renderFeed(); }
   if (page === "invite")     { renderInviteList(); }
   if (page === "settings" && currentUser && currentUser.isadmin) renderAdminPanel();
-  window.scrollTo(0, 0);
+ window.scrollTo(0, 0);
+var activePage = document.getElementById('page-' + page);
+if (activePage) activePage.scrollTop = 0;
   document.body.scrollTop = 0;
   document.documentElement.scrollTop = 0;
 }
