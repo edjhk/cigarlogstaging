@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 48 -->
+ <meta charset="UTF-8"><!-- 49 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -122,9 +122,11 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
     display: none !important;
   }
   /* Add padding so content isn't hidden behind bottom nav */
-    .page.active:not(#page-feed) {
-    padding-bottom: 70px;
-  }
+.page.active:not(#page-feed) {
+  padding-bottom: 70px;
+  overflow-y: auto;
+  max-height: calc(100vh - 64px - 60px);
+}
   #page-feed {
     display: flex;
     flex-direction: column;
@@ -614,7 +616,9 @@ function showPage(page) {
   if (page === "messages")   { renderFeed(); }
   if (page === "invite")     { renderInviteList(); }
   if (page === "settings" && currentUser && currentUser.isadmin) renderAdminPanel();
-  if (page !== 'feed') window.scrollTo(0, 0);
+  window.scrollTo(0, 0);
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
 }
 
 // ── CIGAR JSON ────────────────────────────────────────────────────────────────
