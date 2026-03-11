@@ -1,7 +1,7 @@
 Feed<!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 55 -->
+ <meta charset="UTF-8"><!-- 56 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -708,17 +708,17 @@ async function submitLog() {
   if (!currentUser || !currentUser.supabaseId) { err.textContent = "Not logged in."; return; }
   var btn = document.getElementById("logSaveBtn");
   btn.textContent = "Saving..."; btn.disabled = true;
-  var photoUrl = null;
+  var photo_url = null;
   var f1 = document.getElementById("logPhoto").files[0];
   var f2 = document.getElementById("logPhotoCamera").files[0];
-  if (f1 || f2) { showToast("Uploading photo..."); photoUrl = await uploadPhoto(f1 || f2, "logs"); }
+  if (f1 || f2) { showToast("Uploading photo..."); photo_url = await uploadPhoto(f1 || f2, "logs"); }
   var { error } = await supa.from("cigar_logs").insert({
     user_id: currentUser.supabaseId, cigar_name: logSelectedCigar.cigar.name,
     brand: logSelectedCigar.brand, family: logSelectedCigar.family,
     size: logSelectedCigar.cigar.size || null, shape: logSelectedCigar.cigar.shape || null,
     strength: logSelectedCigar.cigar.strength || null, wrapper: logSelectedCigar.cigar.wrapper_type || null,
     rating: parseInt(rating), price: price ? parseFloat(price) : null,
-    location: location || null, notes: notes || null, photo_url: photoUrl, date_smoked: date
+    location: location || null, notes: notes || null, photo_url: photo_url, date_smoked: date
   });
   btn.textContent = "Save to Journal"; btn.disabled = false;
   if (error) { err.textContent = "Error: " + error.message; return; }
@@ -813,13 +813,13 @@ function selectFamily(brandName, familyName) {
 }
 
 
-async function selectCigar(brandName, familyName, cigarName) {
+async function selectCigar(brandName, familyName, cigar_name) {
   var brand = null, family = null, cigar = null;
   for (var i = 0; i < caDatabase.length; i++) { if (caDatabase[i].name === brandName) { brand = caDatabase[i]; break; } }
   if (!brand) return;
   for (var i = 0; i < brand.families.length; i++) { if (brand.families[i].name === familyName) { family = brand.families[i]; break; } }
   if (!family) return;
-  for (var i = 0; i < family.cigars.length; i++) { if (family.cigars[i].name === cigarName) { cigar = family.cigars[i]; break; } }
+  for (var i = 0; i < family.cigars.length; i++) { if (family.cigars[i].name === cigar_name) { cigar = family.cigars[i]; break; } }
   if (!cigar) return;
   document.getElementById("mainSearch").value = "";
 
@@ -828,7 +828,7 @@ async function selectCigar(brandName, familyName, cigarName) {
   // Fetch CigarLog community average
   var clScore = "Not yet reviewed";
   var { data: logs } = await supa.from("cigar_logs").select("rating")
-    .eq("cigar_name", cigarName).eq("brand", brandName);
+    .eq("cigar_name", cigar_name).eq("brand", brandName);
   if (logs && logs.length) {
     var avg = logs.reduce(function(sum, r) { return sum + r.rating; }, 0) / logs.length;
     clScore = Math.round(avg) + "/100 (" + logs.length + " review" + (logs.length === 1 ? "" : "s") + ")";
@@ -983,18 +983,18 @@ function expandLogFamily(brandName, familyName) {
 }
 
 
-function selectLogCigar(brandName, familyName, cigarName) {
+function selectLogCigar(brandName, familyName, cigar_name) {
   var brand = null, family = null, cigar = null;
   for (var i = 0; i < caDatabase.length; i++) { if (caDatabase[i].name === brandName) { brand = caDatabase[i]; break; } }
   if (!brand) return;
   for (var i = 0; i < brand.families.length; i++) { if (brand.families[i].name === familyName) { family = brand.families[i]; break; } }
   if (!family) return;
-  for (var i = 0; i < family.cigars.length; i++) { if (family.cigars[i].name === cigarName) { cigar = family.cigars[i]; break; } }
+  for (var i = 0; i < family.cigars.length; i++) { if (family.cigars[i].name === cigar_name) { cigar = family.cigars[i]; break; } }
   if (!cigar) return;
   logSelectedCigar = { brand: brandName, family: familyName, cigar: cigar };
   document.getElementById("logCigarSearch").value = "";
   document.getElementById("logSearchResults").innerHTML = "";
-  document.getElementById("logSelectedName").textContent = brandName + " — " + cigarName;
+  document.getElementById("logSelectedName").textContent = brandName + " — " + cigar_name;
   var meta = [];
   if (cigar.size  && cigar.size  !== "N/A") meta.push(cigar.size);
   if (cigar.shape && cigar.shape !== "N/A") meta.push(cigar.shape);
@@ -1028,16 +1028,16 @@ async function postToFeed() {
   var file = fileInput && fileInput.files[0];
   if (!text && !file) { showToast("Add a message or photo to post."); return; }
   if (!currentUser) return;
-  var photoUrl = null;
+  var photo_url = null;
   if (file) {
     showToast("Uploading photo...");
-    photoUrl = await uploadPhoto(file, "feed");
+    photo_url = await uploadPhoto(file, "feed");
   }
   var { error } = await supa.from("feed_posts").insert({ 
     userid: currentUser.supabaseId, 
     username: currentUser.displayName || currentUser.username, 
     text: text || null,
-    photourl: photoUrl
+    photo_url: photo_url
   });
   if (!error) { 
     input.value = ""; 
@@ -1140,12 +1140,12 @@ async function postSidebarFeed() {
   var file = (fileInput && fileInput.files[0]) || (camInput && camInput.files[0]);
   if (!text && !file) return;
   if (!currentUser) return;
-  var photoUrl = null;
+  var photo_url = null;
   if (file) {
     showToast("Uploading...");
-    photoUrl = await uploadPhoto(file, "feed");
-    console.log("photoUrl:", photoUrl);
-    if (!photoUrl) { showToast("Upload failed."); return; }
+    photo_url = await uploadPhoto(file, "feed");
+    console.log("photo_url:", photo_url);
+    if (!photo_url) { showToast("Upload failed."); return; }
     if (fileInput) fileInput.value = "";
     if (camInput) camInput.value = "";
   }
@@ -1154,7 +1154,7 @@ async function postSidebarFeed() {
     userid: currentUser.supabaseId,
     username: currentUser.displayName || currentUser.username,
     text: text || "",
-    photo_url: photoUrl
+    photo_url: photo_url
   }).select();
 
   console.log("insert result:", data, "error:", error);
@@ -1245,8 +1245,8 @@ async function postToFeedPage() {
   var file = (fileInput && fileInput.files[0]) || (camInput && camInput.files[0]);
   if (!text && !file) return;
   if (!currentUser) return;
-  var photoUrl = null;
-  if (file) { showToast('Uploading...'); photoUrl = await uploadPhoto(file, 'feed'); if (!photoUrl) { showToast('Upload failed.'); return; } }
+  var photo_url = null;
+  if (file) { showToast('Uploading...'); photo_url = await uploadPhoto(file, 'feed'); if (!photo_Url) { showToast('Upload failed.'); return; } }
   if (fileInput) fileInput.value = '';
   if (camInput) camInput.value = '';
   if (input) input.value = '';
@@ -1269,26 +1269,26 @@ async function renderReviews() {
   if (!div) return;
   div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:20px;">Loading...</div>';
   if (currentReviewTab === 'latest') {
-    var { data: loglogs } = await supa.from('cigar_logs').select().order('datesmoked', { ascending: false }).limit(50);
+    var { data: loglogs } = await supa.from('cigar_logs').select().order('date_smoked', { ascending: false }).limit(50);
     if (!loglogs || !loglogs.length) { div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px;">No reviews yet.</div>'; return; }
     div.innerHTML = loglogs.map(l => `
       <div style="background:white;border-radius:12px;box-shadow:0 2px 8px var(--shadow);padding:10px 12px;margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-          <strong style="color:var(--dark-tobacco);">${l.cigarname}</strong>
+          <strong style="color:var(--dark-tobacco);">${l.cigar_name}</strong>
           ${l.rating ? `<span style="color:var(--gold);font-weight:700;">${l.rating}</span>` : ''}
         </div>
-        <div style="font-size:0.78rem;color:var(--ash);margin-bottom:6px;">${l.brand || ''} ${l.datesmoked ? '· ' + l.datesmoked : ''}</div>
-        ${l.photourl ? `<img src="${l.photourl}" style="width:100%;border-radius:10px;margin-bottom:6px;max-height:200px;object-fit:cover;">` : ''}
+        <div style="font-size:0.78rem;color:var(--ash);margin-bottom:6px;">${l.brand || ''} ${l.date_smoked ? '· ' + l.date_smoked : ''}</div>
+        ${l.photo_url ? `<img src="${l.photo_url}" style="width:100%;border-radius:10px;margin-bottom:6px;max-height:200px;object-fit:cover;">` : ''}
         ${l.notes ? `<div style="font-size:0.88rem;color:var(--charcoal);">${l.notes}</div>` : ''}
       </div>
     `).join('');
   } else {
-    var { data: rankedlogs } = await supa.from('cigar_logs').select('cigarname, brand, rating');
+    var { data: rankedlogs } = await supa.from('cigar_logs').select('cigar_name, brand, rating');
     if (!rankedlogs || !rankedlogs.length) { div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px;">No reviews yet.</div>'; return; }
     var grouped = {};
     rankedlogs.forEach(l => {
-      if (!grouped[l.cigarname]) grouped[l.cigarname] = { brand: l.brand, ratings: [] };
-      if (l.rating) grouped[l.cigarname].ratings.push(l.rating);
+      if (!grouped[l.cigar_name]) grouped[l.cigar_name] = { brand: l.brand, ratings: [] };
+      if (l.rating) grouped[l.cigar_name].ratings.push(l.rating);
     });
     var ranked = Object.entries(grouped)
       .filter(([, v]) => v.ratings.length > 0)
@@ -1558,7 +1558,7 @@ init();
 </script>
 <!-- BOTTOM NAV (mobile only) -->
 <div class="bottom-nav" id="bottomNav">
-  <button class="bottom-nav-btn" id="bnFeed" onclick="showPage('feed')" title="Feed">🏠</button>
+  <button class="bottom-nav-btn" id="bnFeed" onclick="showPage('feed')">🏠</button>
   <button class="bottom-nav-btn" id="bnLog" onclick="openLogSmoke()" title="Log">🚬</button>
   <button class="bottom-nav-btn" id="bnDiscover" onclick="showPage('dashboard')" title="Discover">🔍</button>
   <button class="bottom-nav-btn" id="bnReviews" onclick="showPage('reviews')" title="Reviews">⭐</button>
