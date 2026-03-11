@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 44 -->
+ <meta charset="UTF-8"><!-- 45 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1045,7 +1045,7 @@ async function postToFeed() {
     showToast("Uploading photo...");
     photoUrl = await uploadPhoto(file, "feed");
   }
-  var { error } = await supa.from("feed_posts").insert({ 
+  var { error } = await supa.from("feedposts").insert({ 
     userid: currentUser.supabaseId, 
     username: currentUser.displayName || currentUser.username, 
     text: text || null,
@@ -1065,7 +1065,7 @@ async function postToFeed() {
 // ── SIDEBAR MESSAGES ──────────────────────────────────────────────────────────
 async function renderSidebarFeed() {
   var div = document.getElementById("sidebarFeedPosts"); if (!div) return;
-  var { data: posts } = await supa.from("feed_posts").select("*").order("created_at", { ascending: true }).limit(60);
+  var { data: posts } = await supa.from("feedposts").select("*").order("created_at", { ascending: true }).limit(60);
   div.innerHTML = "";
   if (!posts || !posts.length) { div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:20px;font-size:0.85rem;'>No messages yet.</div>"; return; }
   posts.forEach(function(p) { appendSidebarPost(p); });
@@ -1136,11 +1136,10 @@ async function appendSidebarPost(post) {
   div.scrollTop = div.scrollHeight;
 }
 
-
 function subscribeToFeed() {
   if (feedchannel) supa.removeChannel(feedchannel);
   feedchannel = supa.channel("feed_realtime")
-    .on("postgres_changes", { event: "INSERT", schema: "public", table: "feed_posts" }, function(payload) {
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "feedposts" }, function(payload) {
       appendSidebarPost(payload.new);
     }).subscribe();
 }
@@ -1163,7 +1162,7 @@ async function postSidebarFeed() {
     if (camInput) camInput.value = "";
   }
   if (input) input.value = "";
-  var { data, error } = await supa.from("feed_posts").insert({
+  var { data, error } = await supa.from("feedposts").insert({
     user_id: currentUser.supabaseId,
     username: currentUser.displayName || currentUser.username,
     text: text || "",
@@ -1207,7 +1206,7 @@ async function renderFeedPage() {
         <strong style="color:var(--dark-tobacco);">${p.username || 'Unknown'}</strong>
         <span style="font-size:0.75rem;color:var(--ash);">${new Date(p.created_at).toLocaleDateString()}</span>
       </div>
-      ${p.photo_url ? `<img src="${p.photo_url}" style="width:100%;border-radius:10px;margin-bottom:6px;max-height:300px;object-fit:cover;">` : ''}
+      ${p.photo_url ? `<img src="${p.photo-url}" style="width:100%;border-radius:10px;margin-bottom:6px;max-height:300px;object-fit:cover;">` : ''}
       ${p.text ? `<div style="color:var(--charcoal);font-size:0.92rem;" id="feedpost-${p.id}">${p.text}</div>` : ''}
     </div>
   `).join('');
@@ -1261,7 +1260,7 @@ async function postToFeedPage() {
   if (fileInput) fileInput.value = '';
   if (camInput) camInput.value = '';
   if (input) input.value = '';
-  await supa.from('feedposts').insert({ userid: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text || null, photourl: photoUrl });
+  await supa.from('feedposts').insert({ userid: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text || null, photo_url: photoUrl });
   renderFeedPage();
 }
 
@@ -1465,7 +1464,7 @@ async function renderAdminUsers() {
 async function renderAdminMessages() {
   var pDiv = document.getElementById('adminFeed');
   pDiv.innerHTML = '<div style="color:var(--ash);padding:12px;">Loading...</div>';
-  var { data: posts } = await supa.from('feedposts').select().order('created_at', { ascending: false }).limit(50);
+  var { data: posts } = await supa.from('feedposts').select().order('created_at', { ascending: true }).limit(50);
   pDiv.innerHTML = '';
   if (!posts || !posts.length) { pDiv.innerHTML = '<div style="color:var(--ash);">No messages.</div>'; return; }
   posts.forEach(function(p) {
