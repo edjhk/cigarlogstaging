@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 40 -->
+ <meta charset="UTF-8"><!-- 41 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -30,6 +30,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
 .dash-layout{display:grid;grid-template-columns:1fr 380px;gap:24px;padding:32px 20px;max-width:1600px;margin:0 auto;}
 @media(max-width:1100px){.dash-layout{grid-template-columns:1fr;}.dash-sidebar{position:static;height:auto;}}
 .dash-main{min-width:0;}
+@media(max-width:768px){#page-feed{display:flex;flex-direction:column;height:calc(100vh - 64px - 60px);}}
 .dash-sidebar{position:sticky;top:84px;height:calc(100vh - 104px);display:flex;flex-direction:column;}
 .btn{padding:12px 24px;border-radius:var(--radius);border:none;font-family:'Lato',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
 .btn-primary{background:var(--ember);color:white;} .btn-primary:hover{background:var(--ember-light);}
@@ -210,7 +211,7 @@ window.supaReady = false;
 <!-- FEED PAGE mobile home -->
 <div id="page-feed" class="page" style="display:flex;flex-direction:column;height:calc(100vh - 64px - 60px);padding:0;">
   <!-- Scrollable posts area -->
-  <div id="feedPagePosts" style="flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;"></div>
+  <div id="feedPagePosts" style="flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column-reverse;gap:8px;"></div>
 
   <!-- Fixed composer at bottom -->
   <div style="background:white;border-top:1px solid var(--light-ash);padding:10px 14px;flex-shrink:0;">
@@ -1015,7 +1016,7 @@ function selectLogCigar(brandName, familyName, cigarName) {
 async function renderFeed() {
   var div = document.getElementById("feedPosts"); if (!div) return;
   div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:20px;'>Loading...</div>";
-  var { data: posts } = await supa.from("feed_posts").select("*").order("created_at", { ascending: false }).limit(50);
+  var { data: posts } = await supa.from('feedposts').select().order('created_at', { ascending: false }).limit(50);
   posts = posts || [];
   if (!posts.length) { div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:30px;'>No posts yet.</div>"; return; }
   div.innerHTML = posts.map(function(p) {
@@ -1066,7 +1067,6 @@ async function renderSidebarFeed() {
   div.innerHTML = "";
   if (!posts || !posts.length) { div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:20px;font-size:0.85rem;'>No messages yet.</div>"; return; }
   posts.forEach(function(p) { appendSidebarPost(p); });
-  div.scrollTop = div.scrollHeight;
 }
 
 function previewFeedPhoto(input) {
