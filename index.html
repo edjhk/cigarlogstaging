@@ -1,7 +1,7 @@
-Feed<!DOCTYPE html>
+var actiFeed<!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 57 -->
+ <meta charset="UTF-8"><!-- 58 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -9,6 +9,7 @@ Feed<!DOCTYPE html>
 <style>
 /* Your CSS unchanged - kept as-is */
 :root {
+  --app-height: 100vh;
   --cream:#F8F4ED; --warm-white:#FDFAF6; --tobacco:#8B5E3C; --dark-tobacco:#5C3D1E;
   --ember:#D4622A; --ember-light:#F08050; --gold:#C9A84C; --gold-light:#E8C97A;
   --charcoal:#2C2418; --ash:#B8A898; --light-ash:#D8CCBF; --band-red:#8B1A1A;
@@ -31,7 +32,7 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
 .dash-layout{display:grid;grid-template-columns:1fr 380px;gap:24px;padding:32px 20px;max-width:1600px;margin:0 auto;}
 @media(max-width:1100px){.dash-layout{grid-template-columns:1fr;}.dash-sidebar{position:static;height:auto;}}
 .dash-main{min-width:0;}
-@media(max-width:768px){#page-feed{display:flex;flex-direction:column;height:calc(100vh - 64px - 60px);}}
+@media(max-width:768px){#page-feed{display:flex;flex-direction:column;height: calc(var(--app-height) - 64px - 60px);}}
 .dash-sidebar{position:sticky;top:84px;height:calc(100vh - 104px);display:flex;flex-direction:column;}
 .btn{padding:12px 24px;border-radius:var(--radius);border:none;font-family:'Lato',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;}
 .btn-primary{background:var(--ember);color:white;} .btn-primary:hover{background:var(--ember-light);}
@@ -117,13 +118,13 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
   #navLinks { display: none !important; }
   .page.active:not(#page-feed) {
     display: block;
-    height: calc(100vh - 64px - 60px);
+    height: calc(var(--app-height) - 64px - 60px);
     overflow-y: auto;
     padding-bottom: 70px;
     position: relative;
     top: 0;
   }
-  #page-feed { display:flex; flex-direction:column; height:calc(100vh - 64px - 60px); padding:0 !important; }
+  #page-feed { display:flex; flex-direction:column; height: calc(var(--app-height) - 64px - 60px); padding:0 !important; }
   .dash-layout { grid-template-columns: 1fr !important; padding: 12px !important; }
   .dash-sidebar { display: none !important; }
 }
@@ -1513,6 +1514,8 @@ function useMyLocation() {
   });
 }
 
+
+
 // ── TOAST ─────────────────────────────────────────────────────────────────────
 function showToast(msg) {
   var t = document.getElementById("toast-el");
@@ -1520,8 +1523,14 @@ function showToast(msg) {
   setTimeout(function() { t.style.opacity = "0"; }, 2500);
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+function setAppHeight() {
+  document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+}
+window.addEventListener('resize', setAppHeight);
+setAppHeight();
+
 async function init() {
+
   await loadCA();
   console.log("init started, caDatabase length:", caDatabase ? caDatabase.length : "null");
   
