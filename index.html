@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 72 -->
+ <meta charset="UTF-8"><!-- 73 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1120,7 +1120,7 @@ async function postSidebarFeed() {
   }
   if (input) input.value = "";
   var { data, error } = await supa.from("feed_posts").insert({
-    userid: currentUser.supabaseId,
+    user_id: currentUser.supabaseId,
     username: currentUser.displayName || currentUser.username,
     text: text || "",
     photo_url: photo_url
@@ -1246,7 +1246,7 @@ async function postToFeedPage() {
   if (fileInput) fileInput.value = '';
   if (camInput) camInput.value = '';
   if (input) input.value = '';
-  await supa.from('feed_posts').insert({ userid: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text || null, photo_url: photo_url });
+  await supa.from('feed_posts').insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text || null, photo_url: photo_url });
   renderFeedPage();
 }
 
