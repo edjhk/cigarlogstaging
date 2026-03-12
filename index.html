@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 66 -->
+ <meta charset="UTF-8"><!-- 67 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -207,9 +207,8 @@ window.supaReady = false;
       <input id="feedPageInput" type="text" placeholder="Share a smoke, a thought..."
         style="flex:1;background:var(--cream);border:1.5px solid var(--light-ash);border-radius:20px;padding:8px 14px;outline:none;color:var(--charcoal);font-size:0.9rem;font-family:Lato,sans-serif;"
         onkeydown="if(event.key==='Enter'){event.preventDefault();postToFeedPage()}">
-      <label for="feedPageFile" style="cursor:pointer;font-size:1.3rem;" title="Photo">📎</label>
+      <button type="button" onclick="showFeedPhotoMenu(this)" style="background:none;border:none;font-size:1.3rem;cursor:pointer;" title="Photo">📷</button>
       <input id="feedPageFile" type="file" accept="image/*" style="display:none;" onchange="postToFeedPage()">
-      <label for="feedPageCam" style="cursor:pointer;font-size:1.3rem;" title="Camera">📷</label>
       <input id="feedPageCam" type="file" accept="image/*" capture="environment" style="display:none;" onchange="postToFeedPage()">
       <button onclick="postToFeedPage()" class="btn btn-primary" style="padding:7px 18px;font-size:0.85rem;">Post</button>
     </div>
@@ -1190,7 +1189,23 @@ async function renderFeedPage() {
   });
 }  // ← closing brace of renderFeedPage
 
+function showFeedPhotoMenu(btn) {
+  const existing = document.getElementById('feedPhotoMenu');
+  if (existing) { existing.remove(); return; }
+  const menu = document.createElement('div');
+  menu.id = 'feedPhotoMenu';
+  menu.style.cssText = 'position:absolute;bottom:60px;right:10px;background:white;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.2);z-index:500;overflow:hidden;';
+  menu.innerHTML = `
+    <div onclick="document.getElementById('feedPageCam').click();this.parentNode.remove();" style="padding:12px 20px;cursor:pointer;font-size:0.9rem;border-bottom:1px solid var(--light-ash);">📷 Take Photo</div>
+    <div onclick="document.getElementById('feedPageFile').click();this.parentNode.remove();" style="padding:12px 20px;cursor:pointer;font-size:0.9rem;">🖼️ Choose from Gallery</div>
+  `;
+  btn.closest('div').style.position = 'relative';
+  btn.closest('div').appendChild(menu);
+  setTimeout(() => document.addEventListener('click', function h(e){ if(!menu.contains(e.target)){menu.remove();document.removeEventListener('click',h);} }), 10);
+}
+
 async function postToFeedPage() {
+
   var input = document.getElementById('feedPageInput');
   var fileInput = document.getElementById('feedPageFile');
   var camInput = document.getElementById('feedPageCam');
