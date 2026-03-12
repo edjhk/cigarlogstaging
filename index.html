@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 78 -->
+ <meta charset="UTF-8"><!-- 79 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1280,14 +1280,17 @@ async function renderReviews() {
     if (!loglogs || !loglogs.length) { div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px;">No reviews yet.</div>'; return; }
     reviewsData = loglogs;
     div.innerHTML = loglogs.map((l, i) => `
-      <div onclick="openReviewDetail(reviewsData[${i}])" style="cursor:pointer;background:white;border-radius:16px;box-shadow:0 2px 10px var(--shadow);padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <strong style="color:var(--dark-tobacco);">${l.cigar_name}</strong>
-            ${l.rating ? `<span style="color:var(--gold);font-weight:700;">${l.rating}</span>` : ''}
+      <div onclick="openReviewDetail(reviewsData[${i}])" style="cursor:pointer;background:white;border-radius:12px;box-shadow:0 2px 8px var(--shadow);padding:10px 12px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+          <div>
+            <div style="font-weight:700;color:var(--dark-tobacco);font-size:1rem;">${l.brand || ''}</div>
+            <div style="font-size:0.82rem;color:var(--ash);">${l.cigar_name}</div>
           </div>
-          <div style="font-size:0.78rem;color:var(--ash);margin-bottom:6px;">${l.brand || ''} ${l.date_smoked ? ' · ' + l.date_smoked : ''}</div>
-          ${l.photo_url ? `<img src="${l.photo_url}" style="width:100%;border-radius:10px;margin-bottom:6px;max-height:200px;object-fit:contain;">` : ''}
-          ${l.notes ? `<div style="font-size:0.88rem;color:var(--charcoal);">${l.notes}</div>` : ''}
+          ${l.rating ? `<span style="color:var(--gold);font-weight:700;font-size:1.1rem;">${l.rating}</span>` : ''}
+        </div>
+        <div style="font-size:0.78rem;color:var(--ash);margin-bottom:6px;">${l.date_smoked ? l.date_smoked : ''}</div>
+        ${l.photo_url ? `<img src="${l.photo_url}" style="width:100%;border-radius:10px;margin-bottom:6px;max-height:200px;object-fit:contain;">` : ''}
+        ${l.notes ? `<div style="font-size:0.88rem;color:var(--charcoal);">${l.notes}</div>` : ''}
       </div>
     `).join('');
   } else {
@@ -1305,35 +1308,46 @@ async function renderReviews() {
     reviewsData = ranked;
     div.innerHTML = ranked.map((r, i) => `
       <div onclick="openReviewDetail(reviewsData[${i}])" style="cursor:pointer;background:white;border-radius:16px;box-shadow:0 2px 10px var(--shadow);padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;">
-          <div style="font-size:1.3rem;font-weight:700;color:var(--light-ash);min-width:32px;">${i + 1}</div>
-          <div style="flex:1;">
-            <div style="font-weight:700;color:var(--dark-tobacco);">${r.name}</div>
-            <div style="font-size:0.78rem;color:var(--ash);">${r.brand || ''} · ${r.count} review${r.count !== 1 ? 's' : ''}</div>
-          </div>
-          <div style="color:var(--gold);font-weight:700;font-size:1.1rem;">${r.avg}</div>
+        <div style="font-size:1.3rem;font-weight:700;color:var(--light-ash);min-width:32px;">${i + 1}</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;color:var(--dark-tobacco);">${r.brand || ''}</div>
+          <div style="font-size:0.82rem;color:var(--ash);">${r.name}</div>
+          <div style="font-size:0.78rem;color:var(--ash);">${r.count} review${r.count !== 1 ? 's' : ''}</div>
+        </div>
+        <div style="color:var(--gold);font-weight:700;font-size:1.1rem;">${r.avg}</div>
       </div>
     `).join('');
   }
 }
 
-
 function openReviewDetail(l) {
+  if (!l) return;
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
   overlay.innerHTML = `
     <div style="background:white;border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;position:relative;">
       <button onclick="this.closest('div').parentNode.remove()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--ash);">✕</button>
-      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--dark-tobacco);margin-bottom:4px;">${l.cigar_name}</div>
-      <div style="font-size:0.8rem;color:var(--ash);margin-bottom:12px;">${l.brand||''} ${l.date_smoked ? '· '+l.date_smoked : ''}</div>
-      ${l.rating ? `<div style="color:var(--gold);font-weight:700;font-size:1.3rem;margin-bottom:12px;">${l.rating}</div>` : ''}
+      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--dark-tobacco);margin-bottom:2px;">${l.brand || l.name || ''}</div>
+      <div style="font-size:0.85rem;color:var(--ash);margin-bottom:12px;">${l.cigar_name || ''}</div>
+      ${l.rating ? `
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+          <div style="background:rgba(201,168,76,0.1);border:1px solid var(--gold);border-radius:10px;padding:8px 14px;text-align:center;">
+            <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--ash);">CigarLog Score</div>
+            <div style="color:var(--gold);font-weight:700;font-size:1.3rem;">${l.rating}</div>
+          </div>
+        </div>` : ''}
+      <div style="font-size:0.78rem;color:var(--ash);margin-bottom:10px;">${l.date_smoked ? '📅 ' + l.date_smoked : ''}${l.location ? ' · 📍 ' + l.location : ''}</div>
       ${l.photo_url ? `<img src="${l.photo_url}" style="width:100%;border-radius:10px;margin-bottom:12px;max-height:240px;object-fit:contain;background:#f0ece5;">` : ''}
-      ${l.notes ? `<div style="font-size:0.92rem;color:var(--charcoal);line-height:1.5;">${l.notes}</div>` : '<div style="color:var(--ash);font-size:0.88rem;">No tasting notes.</div>'}
-      ${l.location ? `<div style="font-size:0.78rem;color:var(--ash);margin-top:10px;">📍 ${l.location}</div>` : ''}
-    </div>
-  `;
-  overlay.onclick = (e) => { if(e.target === overlay) overlay.remove(); };
+      ${l.notes ? `<div style="font-size:0.92rem;color:var(--charcoal);line-height:1.5;margin-bottom:10px;">${l.notes}</div>` : '<div style="color:var(--ash);font-size:0.88rem;">No tasting notes.</div>'}
+      ${l.size ? `<div style="font-size:0.78rem;color:var(--ash);margin-top:8px;">📏 ${l.size}${l.shape ? ' · ' + l.shape : ''}</div>` : ''}
+      ${l.strength ? `<div style="font-size:0.78rem;color:var(--ash);margin-top:4px;">💪 ${l.strength}</div>` : ''}
+      ${l.wrapper ? `<div style="font-size:0.78rem;color:var(--ash);margin-top:4px;">🍂 Wrapper: ${l.wrapper}</div>` : ''}
+      ${l.price ? `<div style="font-size:0.78rem;color:var(--ash);margin-top:4px;">💵 $${parseFloat(l.price).toFixed(2)}</div>` : ''}
+    </div>`;
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
   document.body.appendChild(overlay);
 }
+
 
 // PROFILE PAGE
 function renderProfile() {
