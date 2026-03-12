@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 69 -->
+ <meta charset="UTF-8"><!-- 70 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1268,7 +1268,7 @@ async function renderReviews() {
     var { data: loglogs } = await supa.from('cigar_logs').select().order('date_smoked', { ascending: false }).limit(50);
     if (!loglogs || !loglogs.length) { div.innerHTML = '<div style="color:var(--ash);text-align:center;padding:30px;">No reviews yet.</div>'; return; }
     div.innerHTML = loglogs.map(l => `
-      <div style="background:white;border-radius:12px;box-shadow:0 2px 8px var(--shadow);padding:10px 12px;margin-bottom:8px;">
+      <div onclick="openReviewDetail(${JSON.stringify(l).replace(/"/g,'&quot;')})" style="cursor:pointer;background:white;border-radius:12px;box-shadow:0 2px 8px var(--shadow);padding:10px 12px;margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <strong style="color:var(--dark-tobacco);">${l.cigar_name}</strong>
           ${l.rating ? `<span style="color:var(--gold);font-weight:700;">${l.rating}</span>` : ''}
@@ -1291,7 +1291,7 @@ async function renderReviews() {
       .map(([name, v]) => ({ name, brand: v.brand, avg: Math.round(v.ratings.reduce((a, b) => a + b, 0) / v.ratings.length), count: v.ratings.length }))
       .sort((a, b) => b.avg - a.avg);
     div.innerHTML = ranked.map((r, i) => `
-      <div style="background:white;border-radius:16px;box-shadow:0 2px 10px var(--shadow);padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;">
+      <div onclick="openReviewDetail(${JSON.stringify(r).replace(/"/g,'&quot;')})" style="cursor:pointer;background:white;border-radius:16px;box-shadow:0 2px 10px var(--shadow);padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;">
         <div style="font-size:1.3rem;font-weight:700;color:var(--light-ash);min-width:32px;">${i + 1}</div>
         <div style="flex:1;">
           <div style="font-weight:700;color:var(--dark-tobacco);">${r.name}</div>
@@ -1301,6 +1301,24 @@ async function renderReviews() {
       </div>
     `).join('');
   }
+}
+
+function openReviewDetail(l) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:85vh;overflow-y:auto;position:relative;">
+      <button onclick="this.closest('div').parentNode.remove()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--ash);">✕</button>
+      <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--dark-tobacco);margin-bottom:4px;">${l.cigar_name}</div>
+      <div style="font-size:0.8rem;color:var(--ash);margin-bottom:12px;">${l.brand||''} ${l.date_smoked ? '· '+l.date_smoked : ''}</div>
+      ${l.rating ? `<div style="color:var(--gold);font-weight:700;font-size:1.3rem;margin-bottom:12px;">${l.rating}</div>` : ''}
+      ${l.photo_url ? `<img src="${l.photo_url}" style="width:100%;border-radius:10px;margin-bottom:12px;max-height:240px;object-fit:contain;background:#f0ece5;">` : ''}
+      ${l.notes ? `<div style="font-size:0.92rem;color:var(--charcoal);line-height:1.5;">${l.notes}</div>` : '<div style="color:var(--ash);font-size:0.88rem;">No tasting notes.</div>'}
+      ${l.location ? `<div style="font-size:0.78rem;color:var(--ash);margin-top:10px;">📍 ${l.location}</div>` : ''}
+    </div>
+  `;
+  overlay.onclick = (e) => { if(e.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
 }
 
 // PROFILE PAGE
