@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 74 -->
+ <meta charset="UTF-8"><!-- 754 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -608,7 +608,9 @@ function showPage(page) {
   if (page === 'reviews') renderReviews();
   if (page === 'profile') renderProfile();
   setBottomNav(page);
-  if (page === "dashboard")  { renderDashboard(); renderSidebarFeed(); if (!feedchannel) subscribeToFeed(); }
+  if (page === "dashboard")  { renderDashboard(); renderSidebarFeed(); }
+  if (page === "feed") { if (!feedchannel) subscribeToFeed(); }
+  if (!feedchannel) subscribeToFeed();
   if (page === "messages")   { /*nothing */ }
   if (page === "invite")     { renderInviteList(); }
   if (page === "settings" && currentUser && currentUser.isadmin) renderAdminPanel();
@@ -1026,6 +1028,7 @@ async function renderSidebarFeed() {
   div.innerHTML = "";
   if (!posts || !posts.length) { div.innerHTML = "<div style='color:var(--ash);text-align:center;padding:20px;font-size:0.85rem;'>No messages yet.</div>"; return; }
   posts.forEach(function(p) { appendSidebarPost(p); });
+  setTimeout(function() { div.scrollTop = div.scrollHeight; }, 150);
 }
 
 function previewFeedPhoto(input) {
