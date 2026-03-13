@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 80 -->
+ <meta charset="UTF-8"><!-- 81 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -431,6 +431,7 @@ var currentUser = null;
 var caDatabase  = [];
 var logSelectedCigar = null;
 var feedchannel = null;
+var searchNavStack = []; // tracks where user is in the search drill-down
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 async function doLogin() {
@@ -770,6 +771,7 @@ function handleSearchInput(q) {
   if (!q || q.length < 2) { results.innerHTML = ""; return; }
   var query = q.toLowerCase().trim();
   results.innerHTML = "";
+  searchNavStack = [{ type: 'query', value: q }];
   var count = 0;
   for (var bi = 0; bi < caDatabase.length; bi++) {
     var b = caDatabase[bi];
@@ -807,12 +809,23 @@ function selectFamily(brandName, familyName) {
   if (!brand) return;
   for (var i = 0; i < brand.families.length; i++) { if (brand.families[i].name === familyName) { family = brand.families[i]; break; } }
   if (!family) return;
+  searchNavStack.push({ type: 'family', brand: brandName, family: familyName });
   var results = document.getElementById("searchResults");
   results.innerHTML = "";
   var hdr = document.createElement("div");
   hdr.className = "search-brand-header"; hdr.style.cursor = "pointer";
   hdr.textContent = "\u2190 " + brandName + " \u203a " + familyName;
-  hdr.onclick = function() { results.innerHTML = ""; document.getElementById("mainSearch").value = ""; };
+  hdr.onclick = function() {
+    searchNavStack.pop();
+    var prev = searchNavStack[searchNavStack.length - 1];
+    if (!prev) {
+      results.innerHTML = "";
+      document.getElementById("mainSearch").value = "";
+    } else if (prev.type === 'query') {
+      document.getElementById("mainSearch").value = prev.value;
+      handleSearchInput(prev.value);
+    }
+  };
   results.appendChild(hdr);
   if (!family.cigars || !family.cigars.length) {
     var empty = document.createElement("div");
@@ -831,7 +844,6 @@ function selectFamily(brandName, familyName) {
   });
 }
 
-
 async function selectCigar(brandName, familyName, cigar_name) {
   var brand = null, family = null, cigar = null;
   for (var i = 0; i < caDatabase.length; i++) { if (caDatabase[i].name === brandName) { brand = caDatabase[i]; break; } }
@@ -840,6 +852,7 @@ async function selectCigar(brandName, familyName, cigar_name) {
   if (!family) return;
   for (var i = 0; i < family.cigars.length; i++) { if (family.cigars[i].name === cigar_name) { cigar = family.cigars[i]; break; } }
   if (!cigar) return;
+  searchNavStack.push({ type: 'cigar', brand: brandName, family: familyName, cigar: cigarname }); // ← ADD HERE
   document.getElementById("mainSearch").value = "";
 
   var v = function(a,b) { return (a && a!=="N/A" && a!=="--") ? a : (b && b!=="N/A" && b!=="--") ? b : null; };
@@ -882,8 +895,24 @@ async function selectCigar(brandName, familyName, cigar_name) {
 
   var backBtn = document.createElement("button");
   backBtn.className = "cigar-tile-back"; backBtn.textContent = "\u2190 Back";
-  backBtn.onclick = function() { results.innerHTML = ""; document.getElementById("mainSearch").value = ""; };
-
+  backBtn.onclick = function() {
+    searchNavStack.pop(); // remove current level
+    var prev = searchNavStack[searchNavStack.length - 1];
+    if (!prev) {
+      // back to empty search
+      document.getElementById('mainSearch').value = '';
+      document.getElementById('searchResults').innerHTML = '';
+      return;
+    }
+    if (prev.type === 'query') {
+      // re-run the original search query to show brand/family list
+      document.getElementById('mainSearch').value = prev.value;
+      handleSearchInput(prev.value);
+    } else if (prev.type === 'family') {
+      // go back to the cigar list for that family
+      selectFamily(prev.brand, prev.family);
+    }
+  };
   var title = document.createElement("div");
   title.style.cssText = "font-family:'Playfair Display',serif;font-size:0.85rem;font-weight:600;color:rgba(255,255,255,0.75);margin-top:4px;";
   title.innerHTML = subtitle;
