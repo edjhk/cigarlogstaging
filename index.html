@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 82 -->
+ <meta charset="UTF-8"><!-- 83 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -313,9 +313,9 @@ window.supaReady = false;
       <div class="form-group"><label class="form-label">Photo</label>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <label for="logPhoto" style="cursor:pointer;background:var(--cream);border:1.5px solid var(--light-ash);border-radius:12px;padding:10px 16px;font-size:0.88rem;color:var(--tobacco);font-weight:700;">&#128444; Gallery</label>
-          <input type="file" id="logPhoto" accept="image/*" style="display:none;">
+          <input type="file" id="logPhoto" accept="image/*" style="display:none" onchange="previewLogPhoto">
           <label for="logPhotoCamera" style="cursor:pointer;background:var(--cream);border:1.5px solid var(--light-ash);border-radius:12px;padding:10px 16px;font-size:0.88rem;color:var(--tobacco);font-weight:700;">&#128247; Camera</label>
-          <input type="file" id="logPhotoCamera" accept="image/*" capture="environment" style="display:none;">
+          <input type="file" id="logPhotoCamera" accept="image/*" capture="environment" style="display:none" onchange="previewLogPhoto">
           <span id="logPhotoName" style="font-size:0.8rem;color:var(--ash);"></span>
         </div>
         <img id="logPhotoPreview" src="" style="display:none;margin-top:8px;max-width:100%;border-radius:10px;max-height:200px;object-fit:contain;">
@@ -843,9 +843,10 @@ function selectFamily(brandName, familyName) {
   searchNavStack.push({ type: 'family', brand: brandName, family: familyName });
   var results = document.getElementById("searchResults");
   results.innerHTML = "";
-  var hdr = document.createElement("div");
-  hdr.className = "search-brand-header"; hdr.style.cursor = "pointer";
+  var hdr = document.createElement("button");
+  hdr.style.cssText = "margin:10px 14px 8px 14px; display:block; background:var(--cream); border:2px solid var(--light-ash); color:var(--dark-tobacco); padding:8px 18px; border-radius:20px; cursor:pointer; font-size:0.95rem; font-weight:700; font-family:Lato,sans-serif;";
   hdr.textContent = "\u2190 " + brandName + " \u203a " + familyName;
+
   hdr.onclick = function() {
     searchNavStack.pop();
     var prev = searchNavStack[searchNavStack.length - 1];
