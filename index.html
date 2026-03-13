@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 84 -->
+ <meta charset="UTF-8"><!-- 85 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1043,7 +1043,6 @@ function handleLogSearch(q) {
   });
 }
 
-
 function expandLogFamily(brandName, familyName) {
   var div = document.getElementById("logSearchResults");
   var brand = null, fam = null;
@@ -1061,12 +1060,42 @@ function expandLogFamily(brandName, familyName) {
   breadcrumb.style.cssText = "padding:5px 14px;font-size:0.78rem;color:var(--ash);";
   breadcrumb.textContent = brandName + " \u203a " + familyName;
   div.appendChild(breadcrumb);
+
+  // "+ Log unlisted" button — defined early so custom cigar loader can reappend it at the bottom
+  var addRow = document.createElement("div");
+  addRow.style.cssText = "padding:9px 14px 9px 22px;cursor:pointer;font-size:0.85rem;color:var(--tobacco);border-top:1px dashed var(--light-ash);font-weight:700;";
+  addRow.textContent = "+ Log an unlisted size";
+  addRow.onmousedown = function() {
+    var customName = prompt("Cigar name/size (e.g. Toro BP 6\u00d756) \u2014 required:");
+    if (!customName || !customName.trim()) return;
+    var customSize = prompt("Size (e.g. 6x56) \u2014 or leave blank:");
+    var customStrength = prompt("Strength (Mild / Medium / Full) \u2014 or leave blank:");
+    var customWrapper = prompt("Wrapper type \u2014 or leave blank:");
+    supa.from('custom_cigars').insert({
+      brand: brandName,
+      family: familyName,
+      cigarname: customName.trim(),
+      size: customSize || null,
+      strength: customStrength || null,
+      wrappertype: customWrapper || null,
+      addedby: currentUser.supabaseId
+    }).then(function(result) {
+      if (result.error) { showToast("Error saving cigar."); return; }
+      showToast("Cigar added!");
+      selectLogCigar(brandName, familyName, customName.trim());
+    });
+  };
+
   if (!fam.cigars || !fam.cigars.length) {
     var empty = document.createElement("div");
     empty.style.cssText = "color:var(--ash);padding:8px 14px;font-size:0.85rem;";
     empty.textContent = "No sizes listed.";
-    div.appendChild(empty); return;
+    div.appendChild(empty);
+    div.appendChild(addRow);
+    return;
   }
+
+  // JSON cigars
   fam.cigars.forEach(function(c) {
     var row = document.createElement("div");
     row.style.cssText = "padding:9px 14px 9px 22px;cursor:pointer;font-size:0.88rem;border-bottom:1px solid var(--cream);";
@@ -1077,8 +1106,28 @@ function expandLogFamily(brandName, familyName) {
     })(brandName, familyName, c.name);
     div.appendChild(row);
   });
-}
 
+  // Custom cigars from Supabase
+  supa.from('custom_cigars')
+    .select('*')
+    .eq('brand', brandName)
+    .eq('family', familyName)
+    .then(function(result) {
+      if (result.data && result.data.length) {
+        result.data.forEach(function(c) {
+          var row = document.createElement("div");
+          row.style.cssText = "padding:9px 14px 9px 22px;cursor:pointer;font-size:0.88rem;border-bottom:1px solid var(--cream);color:var(--tobacco);";
+          var meta = c.size ? " \u00b7 " + c.size : "";
+          row.textContent = "\u2728 " + c.cigarname + meta;
+          (function(bn, fn, cn) {
+            row.onmousedown = function() { selectLogCigar(bn, fn, cn); };
+          })(brandName, familyName, c.cigarname);
+          div.appendChild(row);
+        });
+      }
+      div.appendChild(addRow);
+    });
+}
 
 function selectLogCigar(brandName, familyName, cigar_name) {
   var brand = null, family = null, cigar = null;
@@ -1087,7 +1136,7 @@ function selectLogCigar(brandName, familyName, cigar_name) {
   for (var i = 0; i < brand.families.length; i++) { if (brand.families[i].name === familyName) { family = brand.families[i]; break; } }
   if (!family) return;
   for (var i = 0; i < family.cigars.length; i++) { if (family.cigars[i].name === cigar_name) { cigar = family.cigars[i]; break; } }
-  if (!cigar) return;
+  if (!cigar) { cigar = { name: cigar_name, size: null, shape: null, strength: null, wrappertype: null }; }
   logSelectedCigar = { brand: brandName, family: familyName, cigar: cigar };
   document.getElementById("logCigarSearch").value = "";
   document.getElementById("logSearchResults").innerHTML = "";
