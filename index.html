@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 85 -->
+ <meta charset="UTF-8"><!-- 86 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -890,6 +890,26 @@ function selectFamily(brandName, familyName) {
     (function(bn, fn, cn) { row.onclick = function() { selectCigar(bn, fn, cn); }; })(brandName, familyName, c.name);
     results.appendChild(row);
   });
+    // Custom cigars from Supabase
+  supa.from('custom_cigars')
+    .select('*')
+    .eq('brand', brandName)
+    .eq('family', familyName)
+    .then(function(result) {
+      if (!result.data || !result.data.length) return;
+      result.data.forEach(function(c) {
+        var row = document.createElement("div");
+        row.className = "search-result-cigar";
+        row.style.color = "var(--tobacco)";
+        var meta = c.size ? " \u00b7 " + c.size : "";
+        row.textContent = "\u2728 " + c.cigar_name + meta;
+        (function(bn, fn, cn) {
+          row.onclick = function() { selectCigar(bn, fn, cn); };
+        })(brandName, familyName, c.cigar_name);
+        results.appendChild(row);
+      });
+    });
+
 }
 
 
@@ -900,8 +920,8 @@ async function selectCigar(brandName, familyName, cigar_name) {
   for (var i = 0; i < brand.families.length; i++) { if (brand.families[i].name === familyName) { family = brand.families[i]; break; } }
   if (!family) return;
   for (var i = 0; i < family.cigars.length; i++) { if (family.cigars[i].name === cigar_name) { cigar = family.cigars[i]; break; } }
-  if (!cigar) return;
-  searchNavStack.push({ type: 'cigar', brand: brandName, family: familyName, cigar: cigarname }); // ← ADD HERE
+  if (!cigar) { cigar = { name: cigar_name, size: null, shape: null, strength: null, wrappertype: null }; }
+  searchNavStack.push({ type: 'cigar', brand: brandName, family: familyName, cigar: cigar_name }); // ← ADD HERE
   document.getElementById("mainSearch").value = "";
 
   var v = function(a,b) { return (a && a!=="N/A" && a!=="--") ? a : (b && b!=="N/A" && b!=="--") ? b : null; };
@@ -1074,11 +1094,11 @@ function expandLogFamily(brandName, familyName) {
     supa.from('custom_cigars').insert({
       brand: brandName,
       family: familyName,
-      cigarname: customName.trim(),
+      cigar_name: customName.trim(),
       size: customSize || null,
       strength: customStrength || null,
-      wrappertype: customWrapper || null,
-      addedby: currentUser.supabaseId
+      wrapper: customWrapper || null,
+      added_by: currentUser.supabaseId
     }).then(function(result) {
       if (result.error) { showToast("Error saving cigar."); return; }
       showToast("Cigar added!");
@@ -1118,10 +1138,10 @@ function expandLogFamily(brandName, familyName) {
           var row = document.createElement("div");
           row.style.cssText = "padding:9px 14px 9px 22px;cursor:pointer;font-size:0.88rem;border-bottom:1px solid var(--cream);color:var(--tobacco);";
           var meta = c.size ? " \u00b7 " + c.size : "";
-          row.textContent = "\u2728 " + c.cigarname + meta;
+          row.textContent = "\u2728 " + c.cigar_name + meta;
           (function(bn, fn, cn) {
             row.onmousedown = function() { selectLogCigar(bn, fn, cn); };
-          })(brandName, familyName, c.cigarname);
+          })(brandName, familyName, c.cigar_name);
           div.appendChild(row);
         });
       }
