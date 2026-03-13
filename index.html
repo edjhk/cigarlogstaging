@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 81 -->
+ <meta charset="UTF-8"><!-- 82 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -61,8 +61,18 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
 .search-result-cigar:hover{background:var(--cream);}
 .cigar-info-tile{background:white;border-radius:16px;box-shadow:0 4px 24px var(--shadow);overflow:hidden;max-width:480px;margin-top:8px;}
 .cigar-tile-header{background:linear-gradient(135deg,var(--dark-tobacco),var(--charcoal));padding:20px;color:white;}
-.cigar-tile-back{background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);
-  padding:5px 12px;border-radius:20px;cursor:pointer;font-size:0.8rem;margin-bottom:10px;display:inline-block;font-family:'Lato',sans-serif;}
+.cigar-tile-back {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.8);
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+  display: inline-block;
+  font-family: Lato, sans-serif;
+}
 .cigar-tile-back:hover{background:rgba(255,255,255,0.12);color:white;}
 .cigar-tile-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--gold);margin-top:4px;}
 .cigar-tile-subtitle{font-size:0.8rem;color:rgba(255,255,255,0.55);margin-top:4px;}
@@ -432,6 +442,27 @@ var caDatabase  = [];
 var logSelectedCigar = null;
 var feedchannel = null;
 var searchNavStack = []; // tracks where user is in the search drill-down
+
+window.addEventListener('popstate', function(e) {
+  // If we're in a cigar drill-down, go back one level
+  if (searchNavStack.length > 1) {
+    searchNavStack.pop();
+    var prev = searchNavStack[searchNavStack.length - 1];
+    if (prev.type === 'query') {
+      document.getElementById('mainSearch').value = prev.value;
+      handleSearchInput(prev.value);
+    } else if (prev.type === 'family') {
+      selectFamily(prev.brand, prev.family);
+    }
+    // Push a new state so the back button remains available
+    history.pushState(e.state, '', '');
+    return;
+  }
+  // Otherwise navigate between pages normally
+  if (e.state) {
+    showPage(e.state);
+  }
+});
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 async function doLogin() {
