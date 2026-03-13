@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 83 -->
+ <meta charset="UTF-8"><!-- 84 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -833,7 +833,6 @@ function handleSearchInput(q) {
   }
 }
 
-
 function selectFamily(brandName, familyName) {
   var brand = null, family = null;
   for (var i = 0; i < caDatabase.length; i++) { if (caDatabase[i].name === brandName) { brand = caDatabase[i]; break; } }
@@ -843,11 +842,15 @@ function selectFamily(brandName, familyName) {
   searchNavStack.push({ type: 'family', brand: brandName, family: familyName });
   var results = document.getElementById("searchResults");
   results.innerHTML = "";
-  var hdr = document.createElement("button");
-  hdr.style.cssText = "margin:10px 14px 8px 14px; display:block; background:var(--cream); border:2px solid var(--light-ash); color:var(--dark-tobacco); padding:8px 18px; border-radius:20px; cursor:pointer; font-size:0.95rem; font-weight:700; font-family:Lato,sans-serif;";
-  hdr.textContent = "\u2190 " + brandName + " \u203a " + familyName;
 
-  hdr.onclick = function() {
+  // Dark header tile matching cigar view
+  var familyHeader = document.createElement("div");
+  familyHeader.style.cssText = "background:linear-gradient(135deg, var(--dark-tobacco), var(--charcoal)); border-radius:16px; padding:16px 20px; margin-bottom:4px;";
+
+  var backBtn = document.createElement("button");
+  backBtn.className = "cigar-tile-back";
+  backBtn.textContent = "\u2190 Back";
+  backBtn.onclick = function() {
     searchNavStack.pop();
     var prev = searchNavStack[searchNavStack.length - 1];
     if (!prev) {
@@ -858,7 +861,20 @@ function selectFamily(brandName, familyName) {
       handleSearchInput(prev.value);
     }
   };
-  results.appendChild(hdr);
+
+  var familyTitle = document.createElement("div");
+  familyTitle.style.cssText = "font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--gold); margin-top:6px;";
+  familyTitle.textContent = familyName;
+
+  var familySubtitle = document.createElement("div");
+  familySubtitle.style.cssText = "font-size:0.78rem; color:rgba(255,255,255,0.55); margin-top:2px;";
+  familySubtitle.textContent = brandName;
+
+  familyHeader.appendChild(backBtn);
+  familyHeader.appendChild(familyTitle);
+  familyHeader.appendChild(familySubtitle);
+  results.appendChild(familyHeader);
+
   if (!family.cigars || !family.cigars.length) {
     var empty = document.createElement("div");
     empty.style.cssText = "color:var(--ash);padding:12px 28px;"; empty.textContent = "No cigars listed yet.";
@@ -875,6 +891,7 @@ function selectFamily(brandName, familyName) {
     results.appendChild(row);
   });
 }
+
 
 async function selectCigar(brandName, familyName, cigar_name) {
   var brand = null, family = null, cigar = null;
