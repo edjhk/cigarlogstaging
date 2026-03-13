@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 86 -->
+ <meta charset="UTF-8"><!-- 87 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -886,7 +886,7 @@ function selectFamily(brandName, familyName) {
     if (c.size  && c.size  !== "N/A") meta += " \u00b7 " + c.size;
     var row = document.createElement("div");
     row.className = "search-result-cigar";
-    row.textContent = "\uD83D\uDFE2 " + c.name + meta;
+    row.textContent = + c.name + meta;
     (function(bn, fn, cn) { row.onclick = function() { selectCigar(bn, fn, cn); }; })(brandName, familyName, c.name);
     results.appendChild(row);
   });
@@ -902,7 +902,7 @@ function selectFamily(brandName, familyName) {
         row.className = "search-result-cigar";
         row.style.color = "var(--tobacco)";
         var meta = c.size ? " \u00b7 " + c.size : "";
-        row.textContent = "\u2728 " + c.cigar_name + meta;
+        row.textContent = + c.cigar_name + meta;
         (function(bn, fn, cn) {
           row.onclick = function() { selectCigar(bn, fn, cn); };
         })(brandName, familyName, c.cigar_name);
@@ -1138,7 +1138,7 @@ function expandLogFamily(brandName, familyName) {
           var row = document.createElement("div");
           row.style.cssText = "padding:9px 14px 9px 22px;cursor:pointer;font-size:0.88rem;border-bottom:1px solid var(--cream);color:var(--tobacco);";
           var meta = c.size ? " \u00b7 " + c.size : "";
-          row.textContent = "\u2728 " + c.cigar_name + meta;
+          row.textContent = + c.cigar_name + meta;
           (function(bn, fn, cn) {
             row.onmousedown = function() { selectLogCigar(bn, fn, cn); };
           })(brandName, familyName, c.cigar_name);
