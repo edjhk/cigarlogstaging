@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 88 -->
+ <meta charset="UTF-8"><!-- 89 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -251,6 +251,13 @@ window.supaReady = false;
           <input type="text" id="mainSearch" placeholder="Search brand, family or vitola..."
             oninput="handleSearchInput(this.value)"
             style="flex:1;border:none;background:none;outline:none;font-family:'Lato',sans-serif;font-size:1rem;color:var(--charcoal);">
+        </div>
+        <div style="margin-top:10px;padding:11px 16px;background:white;border-radius:12px;
+            border-left:3px solid var(--gold);font-size:0.78rem;color:var(--ash);line-height:1.8;">
+          <strong style="color:var(--dark-tobacco);font-size:0.8rem;">About Ratings</strong><br>
+          <b style="color:var(--charcoal);">CA</b> = Cigar Aficionado score (0–100)<br>
+          <b style="color:var(--charcoal);">CW</b> = Cuban Cigar Website score (Cuban cigars only)<br>
+          <b style="color:var(--charcoal);">CL</b> = CigarLog community average
         </div>
       </div>
       <div id="searchResults" style="margin-bottom:16px;"></div>
@@ -936,6 +943,7 @@ async function selectCigar(brandName, familyName, cigar_name) {
   }
 
   var caScore = v(cigar.ca_ranking, null);
+  var cwScore = (cigar.cw_rating != null) ? cigar.cw_rating : null;
   var caPrice = v(cigar.ca_price, family.ca_price);
 
   var fields = [
@@ -994,17 +1002,19 @@ async function selectCigar(brandName, familyName, cigar_name) {
   // Score badges in the header
   var scores = document.createElement("div");
   scores.style.cssText = "display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;";
-scores.innerHTML =
-  "<div style='background:rgba(0,0,0,0.3);border:1px solid rgba(201,168,76,0.6);border-radius:8px;padding:6px 12px;'>" +
-    "<div style='color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;'>Cigar Aficionado Score</div>" +
-    "<div style='color:var(--gold);font-weight:700;font-size:1.1rem;'>" + (caScore || "—") + "</div>" +
-  "</div>" +
-  "<div style='background:rgba(0,0,0,0.3);border:1px solid rgba(74,124,89,0.6);border-radius:8px;padding:6px 12px;'>" +
-    "<div style='color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;'>CigarLog Score</div>" +
-    "<div style='color:#7dd99a;font-weight:700;font-size:1.1rem;'>" + clScore + "</div>" +
-  "</div>";
-
-
+scores.innerHTML = `
+  ${caScore ? `<div style="background:rgba(0,0,0,0.3);border:1px solid rgba(201,168,76,0.6);border-radius:8px;padding:6px 12px;">
+    <div style="color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;">CA</div>
+    <div style="color:var(--gold);font-weight:700;font-size:1.1rem;">${caScore}</div>
+  </div>` : ''}
+  ${cwScore != null ? `<div style="background:rgba(0,0,0,0.3);border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:6px 12px;">
+    <div style="color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;">CW</div>
+    <div style="color:var(--gold-light);font-weight:700;font-size:1.1rem;">${cwScore}</div>
+  </div>` : ''}
+  <div style="background:rgba(0,0,0,0.3);border:1px solid rgba(74,124,89,0.6);border-radius:8px;padding:6px 12px;">
+    <div style="color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;">CL</div>
+    <div style="color:#7dd99a;font-weight:700;font-size:1.1rem;">${clScore}</div>
+  </div>`;
 
   tileHead.appendChild(backBtn);
   tileHead.appendChild(title);
