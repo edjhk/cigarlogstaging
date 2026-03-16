@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 90 -->
+ <meta charset="UTF-8"><!-- 91 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -403,9 +403,10 @@ window.supaReady = false;
           <div id="inviteLinkText" style="font-size:0.88rem;color:var(--dark-tobacco);"></div>
         </div>
         <button class="btn btn-gold" style="width:100%;margin-top:12px;" onclick="copyInviteLink()">Copy Link</button>
-       <img id="inviteQR" src="" style="display:none;margin-top:16px;border-radius:12px;width:180px;height:180px;" alt="QR Code">
-        <div style="font-size:0.75rem;color:var(--ash);text-align:center;margin-top:6px;">Scan to join CigarLog</div>
-      </div>
+        <div style="text-align:center;margin-top:16px;">
+          <img id="inviteQR" src="" style="display:none;border-radius:12px;width:180px;height:180px;" alt="QR Code">
+          <div style="font-size:0.75rem;color:var(--ash);margin-top:6px;">Scan to join CigarLog</div>
+        </div>
       <div style="margin-top:28px;border-top:1px solid var(--light-ash);padding-top:20px;">
         <h3 style="font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:12px;">Sent Invites</h3>
         <div id="inviteList"></div>
@@ -1555,6 +1556,9 @@ async function regenerateInvite(oldId, name) {
   var link = 'https://edjhk.github.io/cigarlog-source/#invite=' + token;
   document.getElementById('inviteLinkText').textContent = link;
   document.getElementById('inviteResult').style.display = 'block';
+    var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(link);
+  document.getElementById('inviteQR').src = qrUrl;
+  document.getElementById('inviteQR').style.display = 'block';
   showToast('New link generated for ' + name + '!');
   renderInviteList();
 }
@@ -1602,7 +1606,7 @@ async function renderInviteList() {
     statusSpan.style.cssText = 'color:' + statusColor + ';font-size:0.78rem;font-weight:700;';
     statusSpan.textContent = status;
     right.appendChild(statusSpan);
-    if (expired && !inv.accepted_by) {
+    if (!inv.accepted_by) {
       var regenBtn = document.createElement('button');
       regenBtn.style.cssText = 'background:var(--cream);border:1.5px solid var(--light-ash);border-radius:8px;padding:4px 10px;font-size:0.75rem;cursor:pointer;color:var(--tobacco);font-weight:700;';
       regenBtn.textContent = 'New Link';
