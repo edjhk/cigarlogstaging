@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 91 -->
+ <meta charset="UTF-8"><!-- 92 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -642,6 +642,14 @@ function navGo(page) {
 // ── PAGES ─────────────────────────────────────────────────────────────────────
 function showPage(page) {
   document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
+function showPage(page) {
+    // Clear buying guide state when navigating away
+    if (page !== 'dashboard') {
+        document.getElementById('mainSearch').value = '';
+        document.getElementById('searchResults').innerHTML = '';
+        searchNavStack = [];
+    }
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
   var t = document.getElementById("page-" + page);
   if (!t) { console.warn("showPage: no element found for page-" + page); return; }
   t.classList.add("active");
