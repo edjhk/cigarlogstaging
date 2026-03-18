@@ -668,9 +668,9 @@ function showPage(page) {
 // ── CIGAR JSON ────────────────────────────────────────────────────────────────
 async function loadCA() {
   try {
-    var r = await fetch("cigar_brands.json");
+    var r = await fetch("cigar_master.json");
     if (r.ok) { var d = await r.json(); caDatabase = d.brands || []; }
-  } catch(e) { console.warn("cigar_brands.json:", e); }
+  } catch(e) { console.warn("cigar_master.json:", e); }
 }
 
 // ── PHOTO UPLOAD ──────────────────────────────────────────────────────────────
