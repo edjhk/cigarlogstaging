@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 94 -->
+ <meta charset="UTF-8"><!-- 95 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
+  
 /* Your CSS unchanged - kept as-is */
 :root {
   --app-height: 100vh;
@@ -141,7 +142,13 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
   .bottom-nav { display: none !important; }
 }
 
-</style>
+    /* TEMP DEBUG */
+    .bottom-nav {
+      display: flex !important;
+    }
+
+  </style>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // Ensure supabase library is available before any code runs
