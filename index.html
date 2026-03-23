@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 95 -->
+ <meta charset="UTF-8"><!-- 96 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -440,9 +440,36 @@ window.supaReady = false;
 </div>
 
 
-<div id="toast-el" class="toast"></div>
+  <div id="toast-el" class="toast"></div>
 
-<script>
+  <!-- BOTTOM NAV (mobile only) -->
+  <div class="bottom-nav" id="bottomNav">
+    <button class="bottom-nav-btn" id="bnFeed" onclick="showPage('feed')">
+      <span style="font-size:1.4rem">🏠</span>
+      <span style="font-size:0.65rem;margin-top:2px">Feed</span>
+    </button>
+    <button class="bottom-nav-btn" id="bnLog" onclick="openLogSmoke()">
+      <span style="font-size:1.4rem">🚬</span>
+      <span style="font-size:0.65rem;margin-top:2px">Log</span>
+    </button>
+    <button class="bottom-nav-btn" id="bnDiscover" onclick="showPage('dashboard')">
+      <span style="font-size:1.4rem">🔍</span>
+      <span style="font-size:0.65rem;margin-top:2px">Discover</span>
+    </button>
+    <button class="bottom-nav-btn" id="bnReviews" onclick="showPage('reviews')">
+      <span style="font-size:1.4rem">⭐</span>
+      <span style="font-size:0.65rem;margin-top:2px">Reviews</span>
+    </button>
+    <button class="bottom-nav-btn" id="bnProfile" onclick="handleProfileBtn()">
+      <span style="font-size:1.4rem">👤</span>
+      <span style="font-size:0.65rem;margin-top:2px">Profile</span>
+    </button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+
+
 var supa;
 function initSupa() {
   if (supa) return supa;
@@ -1784,30 +1811,6 @@ showPage('dashboard');
 }
 init();
 </script>
-<!-- BOTTOM NAV (mobile only) -->
-<div class="bottom-nav" id="bottomNav">
-  <button class="bottom-nav-btn" id="bnFeed" onclick="showPage('feed')">
-    <span style="font-size:1.4rem">🏠</span>
-    <span style="font-size:0.65rem;margin-top:2px">Feed</span>
-  </button>
-  <button class="bottom-nav-btn" id="bnLog" onclick="openLogSmoke()">
-    <span style="font-size:1.4rem">🚬</span>
-    <span style="font-size:0.65rem;margin-top:2px">Log</span>
-  </button>
-  <button class="bottom-nav-btn" id="bnDiscover" onclick="showPage('dashboard')">
-    <span style="font-size:1.4rem">🔍</span>
-    <span style="font-size:0.65rem;margin-top:2px">Discover</span>
-  </button>
-  <button class="bottom-nav-btn" id="bnReviews" onclick="showPage('reviews')">
-    <span style="font-size:1.4rem">⭐</span>
-    <span style="font-size:0.65rem;margin-top:2px">Reviews</span>
-  </button>
-  <button class="bottom-nav-btn" id="bnProfile" onclick="handleProfileBtn()">
-    <span style="font-size:1.4rem">👤</span>
-    <span style="font-size:0.65rem;margin-top:2px">Profile</span>
-  </button>
-</div>
-
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2C2418">
