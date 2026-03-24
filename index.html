@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 101 -->
+ <meta charset="UTF-8"><!-- 102 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1242,8 +1242,8 @@ scores.innerHTML = `
   });
 
   var wishBtn = makeAction('☆', 'Wishlist', function () {
-    console.log('Wishlist star clicked', brandName, familyName, cigarname); 
-    toggleWishlist(brandName, familyName, cigarname);
+    console.log('Wishlist star clicked', brandName, familyName, cigar.name); 
+    toggleWishlist(brandName, familyName, cigar.name);
   });
 
   wishBtn.dataset.wishBrand = brandName;
