@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 100 -->
+ <meta charset="UTF-8"><!-- 101 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -460,7 +460,7 @@ window.supaReady = false;
     <span style="font-size:0.65rem;margin-top:2px">Feed</span>
   </button>
   <button class="bottom-nav-btn" id="bnLog" onclick="openLogSmoke()">
-    <span>&#128684;</span>
+    <span>✍️</span>
     <span style="font-size:0.65rem;margin-top:2px">Log</span>
   </button>
   <button class="bottom-nav-btn" id="bnDiscover" onclick="showPage('dashboard')">
@@ -1242,6 +1242,7 @@ scores.innerHTML = `
   });
 
   var wishBtn = makeAction('☆', 'Wishlist', function () {
+    console.log('Wishlist star clicked', brandName, familyName, cigarname); 
     toggleWishlist(brandName, familyName, cigarname);
   });
 
