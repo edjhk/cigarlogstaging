@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 102 -->
+ <meta charset="UTF-8"><!-- 103 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1248,7 +1248,7 @@ scores.innerHTML = `
 
   wishBtn.dataset.wishBrand = brandName;
   wishBtn.dataset.wishFamily = familyName;
-  wishBtn.dataset.wishCigar = cigarname;
+  wishBtn.dataset.wishCigar = cigar.name;
 
   actions.appendChild(logBtn);
   actions.appendChild(wishBtn);
@@ -1263,6 +1263,7 @@ scores.innerHTML = `
   tile.appendChild(tileHead);
   tile.appendChild(tileBody);
   results.appendChild(tile);
+  updateWishlistIcons();  // must be here, outside the Actions block
 }
 
 // ── LOG SEARCH ────────────────────────────────────────────────────────────────
