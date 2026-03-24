@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 99 -->
+ <meta charset="UTF-8"><!-- 100 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -83,6 +83,9 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--charcoal)
 .cigar-tile-label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--ash);}
 .cigar-tile-value{font-size:0.92rem;color:var(--charcoal);font-weight:500;text-align:right;max-width:60%;}
 .admin-section{background:white;border-radius:16px;padding:24px;margin-top:24px;box-shadow:0 3px 15px var(--shadow);}
+.wishlist-row:hover {
+  color: var(--tobacco);
+}
 .admin-item{padding:12px;border-bottom:1px solid var(--light-ash);display:flex;justify-content:space-between;align-items:center;}
 .admin-item:last-child{border-bottom:none;}
 .admin-btn{background:var(--band-red);color:white;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:0.85rem;}
@@ -263,6 +266,18 @@ window.supaReady = false;
         </div>
       </div>
       <div id="searchResults" style="margin-bottom:16px;"></div>
+<!-- Wishlist -->
+      <div id="wishlistBox" style="margin-top:24px;">
+        <div style="font-family:'Playfair Display',serif;
+                    font-size:1.1rem;font-weight:700;
+                    color:var(--dark-tobacco);margin-bottom:8px;">
+          Wishlist
+        </div>
+        <div id="wishlistList"
+            style="background:white;border-radius:12px;
+                    box-shadow:0 3px 12px var(--shadow);
+                    padding:8px 12px;"></div>
+      </div>
       <div class="cigars-grid" id="cigarsGrid"></div>
     </div>
     <div class="dash-sidebar">
@@ -481,7 +496,8 @@ var currentUser = null;
 var caDatabase  = [];
 var logSelectedCigar = null;
 var feedchannel = null;
-var searchNavStack = []; // tracks where user is in the search drill-down
+var searchNavStack = [];  // tracks where user is in the search drill-down
+var wishlist = [];
 
 window.addEventListener('popstate', function(e) {
   // If we're in a cigar drill-down, go back one level
@@ -527,6 +543,7 @@ async function doLogin() {
   localStorage.setItem("cl_session", u);
   btn.textContent = "Sign In"; btn.disabled = false;
   updateNav();
+  loadWishlist();
   showPage("feed");
 }
 
@@ -616,7 +633,7 @@ function updateNav() {
   if (links) {
     links.innerHTML = "";
     var btns = [
-      { label: "🚬 Log a Smoke", fn: function() { openLogSmoke(); } },
+      { label: "✍️ Log a Smoke", fn: function() { openLogSmoke(); } },
       { label: "Messages", fn: function() { showPage("messages"); } },
       { label: "Events",   fn: function() { showPage("events"); } },
       { label: "Invite",   fn: function() { showPage("invite"); } },
@@ -625,7 +642,7 @@ function updateNav() {
       var el = document.createElement("button");
       el.className = "nav-btn"; el.textContent = b.label;
       el.style.cssText = "padding:6px 12px;";
-      if (b.label === "🚬 Log a Smoke") { el.classList.add("btn-primary"); el.style.cssText = "padding:6px 16px;font-size:0.9rem;"; }
+      if (b.label === "✍️ Log a Smoke") { el.classList.add("btn-primary"); el.style.cssText = "padding:6px 16px;font-size:0.9rem;"; }
       el.onclick = b.fn;
       links.appendChild(el);
     });
@@ -839,6 +856,136 @@ function clearLogCigar() {
   document.getElementById("logSelectedCigar").style.display = "none";
   document.getElementById("logCigarSearch").value = "";
   document.getElementById("logSearchResults").innerHTML = "";
+}
+
+// ── WISHLIST ────────────────────────────────────────────────────────────────
+async function loadWishlist() {
+  if (!currentUser || !currentUser.supabaseId) return;
+
+  var { data: items, error } = await supa
+    .from('wishlist')
+    .select()
+    .eq('user_id', currentUser.supabaseId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.warn('wishlist load error', error);
+    return;
+  }
+  wishlist = items || [];
+  renderWishlist();
+  updateWishlistIcons();
+}
+
+function isInWishlist(brand, family, cigarname) {
+  return wishlist.some(
+    w =>
+      w.brand === brand &&
+      w.family === family &&
+      w.cigarname === cigarname
+  );
+}
+
+async function toggleWishlist(brand, family, cigarname) {
+  if (!currentUser || !currentUser.supabaseId) {
+    showToast('Please sign in first.');
+    return;
+  }
+
+  var existing = wishlist.find(
+    w =>
+      w.brand === brand &&
+      w.family === family &&
+      w.cigarname === cigarname
+  );
+
+  if (existing) {
+    var { error } = await supa
+      .from('wishlist')
+      .delete()
+      .eq('id', existing.id);
+
+    if (error) {
+      console.warn('wishlist delete error', error);
+      showToast('Error removing from wishlist.');
+      return;
+    }
+    wishlist = wishlist.filter(w => w.id !== existing.id);
+  } else {
+    var { data, error } = await supa
+      .from('wishlist')
+      .insert({
+        user_id: currentUser.supabaseId,
+        brand,
+        family,
+        cigarname
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.warn('wishlist insert error', error);
+      showToast('Error adding to wishlist.');
+      return;
+    }
+    wishlist.unshift(data);
+  }
+
+  renderWishlist();
+  updateWishlistIcons();
+}
+
+function renderWishlist() {
+  var box = document.getElementById('wishlistBox');
+  var list = document.getElementById('wishlistList');
+  if (!box || !list) return;
+
+  if (!wishlist.length) {
+    list.innerHTML =
+      '<div style="color:var(--ash);font-size:0.85rem;padding:6px 2px;">' +
+      'Add cigars to your wishlist from the buying guide.' +
+      '</div>';
+    return;
+  }
+
+  list.innerHTML = wishlist
+    .map(function (w) {
+      var text =
+        w.brand + ' \u00B7 ' + w.family + ' \u00B7 ' + w.cigarname;
+      return (
+        '<div class="wishlist-row" ' +
+        'data-brand="' + w.brand + '" ' +
+        'data-family="' + w.family + '" ' +
+        'data-cigar="' + w.cigarname + '" ' +
+        'style="padding:6px 0;border-bottom:1px solid var(--cream);' +
+        'font-size:0.85rem;cursor:pointer;white-space:nowrap;' +
+        'overflow:hidden;text-overflow:ellipsis;">' +
+        '\u2605 ' + text +
+        '</div>'
+      );
+    })
+    .join('');
+
+  list.querySelectorAll('.wishlist-row').forEach(function (row) {
+    row.onclick = function () {
+      var b = row.dataset.brand;
+      var f = row.dataset.family;
+      var c = row.dataset.cigar;
+      selectCigar(b, f, c);
+    };
+  });
+}
+
+function updateWishlistIcons() {
+  document.querySelectorAll('[data-wish-brand]')
+    .forEach(function (btn) {
+      var inWL = isInWishlist(
+        btn.dataset.wishBrand,
+        btn.dataset.wishFamily,
+        btn.dataset.wishCigar
+      );
+      btn.firstChild.textContent = inWL ? '★' : '☆';
+    });
 }
 
 // ── CIGAR SEARCH ──────────────────────────────────────────────────────────────
@@ -1058,6 +1205,55 @@ scores.innerHTML = `
   tileHead.appendChild(title);
   tileHead.appendChild(sub);
   tileHead.appendChild(scores);
+
+   // ── Actions (Log + Wishlist) ───────────────────────────────
+  var actions = document.createElement('div');
+  actions.style.cssText =
+    'display:flex;gap:16px;margin-top:12px;align-items:center;';
+
+  function makeAction(icon, label, handler) {
+    var wrap = document.createElement('button');
+    wrap.style.cssText =
+      'display:flex;flex-direction:column;align-items:center;'+
+      'justify-content:center;background:none;border:none;'+
+      'color:rgba(255,255,255,0.9);cursor:pointer;font-size:1.1rem;';
+    var i = document.createElement('div');
+    i.textContent = icon;
+    var t = document.createElement('div');
+    t.textContent = label;
+    t.style.cssText =
+      'font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;'+
+      'margin-top:2px;color:rgba(255,255,255,0.7);';
+    wrap.appendChild(i);
+    wrap.appendChild(t);
+    wrap.onclick = handler;
+    return wrap;
+  }
+
+  var logBtn = makeAction('✍️', 'Log', function () {
+    // pre-fill log form with this cigar
+    logSelectedCigar = { brand: brandName, family: familyName, cigar: cigar };
+    document.getElementById('logCigarSearch').value =
+      brandName + ' ' + cigarname;
+    document.getElementById('logSelectedName').textContent =
+      brandName + ' · ' + cigarname;
+    document.getElementById('logSelectedCigar').style.display = 'block';
+    showPage('log');
+  });
+
+  var wishBtn = makeAction('☆', 'Wishlist', function () {
+    toggleWishlist(brandName, familyName, cigarname);
+  });
+
+  wishBtn.dataset.wishBrand = brandName;
+  wishBtn.dataset.wishFamily = familyName;
+  wishBtn.dataset.wishCigar = cigarname;
+
+  actions.appendChild(logBtn);
+  actions.appendChild(wishBtn);
+  tileHead.appendChild(actions);
+  // ── end Actions block ──────────────────────────────────────
+
 
   var tileBody = document.createElement("div");
   tileBody.className = "cigar-tile-body";
@@ -1803,6 +1999,7 @@ if (!profile) { updateNav(); showPage('auth'); return; }
 currentUser = { supabaseId: profile.id, username: profile.username, 
 display_name: profile.display_name, avatar: profile.avatar, is_admin: profile.is_admin };
 updateNav();
+loadWishlist();
 showPage('dashboard');
 }
 init();
