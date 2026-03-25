@@ -3,7 +3,7 @@
 <head>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2C2418">
-<meta charset="UTF-8"><!-- 114 -->
+<meta charset="UTF-8"><!-- 115 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1583,7 +1583,7 @@ async function postSidebarFeed() {
   if (input) input.value = "";
   var { data, error } = await supa.from("feed_posts").insert({
     user_id: currentUser.supabaseId,
-    username: currentUser.displayName || currentUser.username,
+    username: currentUser.display_Name || currentUser.username,
     text: text || "",
     photo_url: photo_url
   }).select();
