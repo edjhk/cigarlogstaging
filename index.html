@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 112 -->
+ <meta charset="UTF-8"><!-- 113 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1599,10 +1599,15 @@ async function renderFeedPage() {
   div.innerHTML = posts.map(p => `
     <div style="background:white;border-radius:12px;box-shadow:0 2px 8px var(--shadow);padding:10px 12px;margin-bottom:8px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <strong style="color:var(--dark-tobacco);">${p.username || 'Unknown'}</strong>
-        <span style="font-size:0.75rem;color:var(--ash);">${new Date(p.created_at).toLocaleDateString()}</span>
+        <strong style="color:var(--dark-tobacco)">${p.username || 'Unknown'}</strong>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:0.75rem;color:var(--ash)">${new Date(p.created_at).toLocaleDateString()}</span>
+          ${p.user_id === currentUser?.supabaseId
+            ? `<button onclick="deletePost('${p.id}')" style="background:none;border:none;font-size:1rem;cursor:pointer;color:var(--ash);padding:0;" title="Delete">🗑</button>`
+            : ''}
+        </div>
       </div>
-      ${p.photo_url ? `<img src="${p.photo_url}" style="width:100%;border-radius:10px;margin-bottom:6px;max-height:300px;object-fit:contain;">` : ''}
+      ${p.photo_url ? `<img src="${p.photo_url}" style="width:100%;border-radius:10px;margin-bottom:6px;max-height:300px;object-fit:contain">` : ''}
       ${p.text ? `<div style="color:var(--charcoal);font-size:0.92rem;" id="feedpost-${p.id}">${p.text}</div>` : ''}
     </div>
   `).join('');
@@ -1989,6 +1994,7 @@ async function deletePost(id) {
   showToast('Message deleted');
   renderAdminMessages();
   renderSidebarFeed();
+  renderFeedPage();
 }
 
 async function sendPasswordReset(email, name) {
