@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 108 -->
+ <meta charset="UTF-8"><!-- 109 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1691,7 +1691,7 @@ async function postToFeedPage() {
       .from('feed_posts')
       .insert({
         user_id: currentUser.supabaseId,
-        username: (currentUser.displayname || currentUser.username),
+        username: (currentUser.display_name || currentUser.username),
         text: text || null,
         photo_url: photo_url
       });
