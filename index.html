@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 103 -->
+ <meta charset="UTF-8"><!-- 104 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -256,13 +256,6 @@ window.supaReady = false;
           <input type="text" id="mainSearch" placeholder="Search brand, family or vitola..."
             oninput="handleSearchInput(this.value)"
             style="flex:1;border:none;background:none;outline:none;font-family:'Lato',sans-serif;font-size:1rem;color:var(--charcoal);">
-        </div>
-        <div style="margin-top:10px;padding:11px 16px;background:white;border-radius:12px;
-            border-left:3px solid var(--gold);font-size:0.78rem;color:var(--ash);line-height:1.8;">
-          <strong style="color:var(--dark-tobacco);font-size:0.8rem;">About Ratings</strong><br>
-          <b style="color:var(--charcoal);">CA</b> = Cigar Aficionado score (0–100)<br>
-          <b style="color:var(--charcoal);">CW</b> = Cuban Cigar Website score (Cuban cigars only)<br>
-          <b style="color:var(--charcoal);">CL</b> = CigarLog community average
         </div>
       </div>
       <div id="searchResults" style="margin-bottom:16px;"></div>
@@ -1027,17 +1020,56 @@ function handleSearchInput(q) {
 
 function selectFamily(brandName, familyName) {
   var brand = null, family = null;
-  for (var i = 0; i < caDatabase.length; i++) { if (caDatabase[i].name === brandName) { brand = caDatabase[i]; break; } }
+
+  for (var i = 0; i < caDatabase.length; i++) {
+    if (caDatabase[i].name === brandName) {
+      brand = caDatabase[i];
+      break;
+    }
+  }
   if (!brand) return;
-  for (var i = 0; i < brand.families.length; i++) { if (brand.families[i].name === familyName) { family = brand.families[i]; break; } }
+
+  for (var j = 0; j < brand.families.length; j++) {
+    if (brand.families[j].name === familyName) {
+      family = brand.families[j];
+      break;
+    }
+  }
   if (!family) return;
+
   searchNavStack.push({ type: 'family', brand: brandName, family: familyName });
+
   var results = document.getElementById("searchResults");
   results.innerHTML = "";
 
-  // Dark header tile matching cigar view
-  var familyHeader = document.createElement("div");
-  familyHeader.style.cssText = "background:linear-gradient(135deg, var(--dark-tobacco), var(--charcoal)); border-radius:16px; padding:16px 20px; margin-bottom:4px;";
+  // Brand header band (half-width card)
+  var brandHeader = document.createElement('div');
+  brandHeader.style.cssText =
+    'background:linear-gradient(135deg, var(--dark-tobacco), var(--charcoal));' +
+    'border-radius:16px;padding:10px 14px;margin-bottom:8px;' +
+    'color:white;display:flex;justify-content:space-between;align-items:center;' +
+    'max-width:480px;';
+
+  var brandTitle = document.createElement('div');
+  brandTitle.style.cssText =
+    'font-family:Playfair Display,serif;font-size:0.95rem;font-weight:700;';
+  brandTitle.textContent = brandName;
+
+  var brandKey = document.createElement('div');
+  brandKey.style.cssText =
+    'font-size:0.7rem;color:rgba(255,255,255,0.75);text-align:right;';
+  brandKey.textContent = 'CA=Cigar Aficionado · CW=Cuban Website · CL=CigarLog';
+
+  brandHeader.appendChild(brandTitle);
+  brandHeader.appendChild(brandKey);
+  results.appendChild(brandHeader);
+
+  // Family header band (match cigar card width)
+  var familyHeader = document.createElement('div');
+  familyHeader.style.cssText =
+    'background:linear-gradient(135deg, var(--dark-tobacco), var(--charcoal));' +
+    'border-radius:16px;padding:16px 20px;margin-bottom:4px;color:white;' +
+    'max-width:480px;display:flex;justify-content:space-between;align-items:center;';
 
   var backBtn = document.createElement("button");
   backBtn.className = "cigar-tile-back";
@@ -1055,34 +1087,56 @@ function selectFamily(brandName, familyName) {
   };
 
   var familyTitle = document.createElement("div");
-  familyTitle.style.cssText = "font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--gold); margin-top:6px;";
+  familyTitle.style.cssText =
+    "font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--gold);margin-top:6px;";
   familyTitle.textContent = familyName;
 
   var familySubtitle = document.createElement("div");
-  familySubtitle.style.cssText = "font-size:0.78rem; color:rgba(255,255,255,0.55); margin-top:2px;";
+  familySubtitle.style.cssText =
+    "font-size:0.78rem;color:rgba(255,255,255,0.55);margin-top:2px;";
   familySubtitle.textContent = brandName;
 
+  // Group title + subtitle
+  var familyInfo = document.createElement('div');
+  familyInfo.appendChild(familyTitle);
+  familyInfo.appendChild(familySubtitle);
+
+  // Compact key on the right
+  var familyKey = document.createElement('div');
+  familyKey.style.cssText =
+    'font-size:0.7rem;color:rgba(255,255,255,0.75);text-align:right;';
+  familyKey.textContent = 'CA=Cigar Aficionado · CW=Cuban Website · CL=CigarLog';
+
   familyHeader.appendChild(backBtn);
-  familyHeader.appendChild(familyTitle);
-  familyHeader.appendChild(familySubtitle);
+  familyHeader.appendChild(familyInfo);
+  familyHeader.appendChild(familyKey);
   results.appendChild(familyHeader);
 
+  // Cigar list from main CA DB
   if (!family.cigars || !family.cigars.length) {
     var empty = document.createElement("div");
-    empty.style.cssText = "color:var(--ash);padding:12px 28px;"; empty.textContent = "No cigars listed yet.";
-    results.appendChild(empty); return;
+    empty.style.cssText = "color:var(--ash);padding:12px 28px;";
+    empty.textContent = "No cigars listed yet.";
+    results.appendChild(empty);
+  } else {
+    family.cigars.forEach(function(c) {
+      var meta = "";
+      if (c.shape && c.shape !== "N/A") meta += " \u00b7 " + c.shape;
+      if (c.size  && c.size  !== "N/A") meta += " \u00b7 " + c.size;
+
+      var row = document.createElement("div");
+      row.className = "search-result-cigar";
+      row.textContent = c.name + meta;
+
+      (function(bn, fn, cn) {
+        row.onclick = function() { selectCigar(bn, fn, cn); };
+      })(brandName, familyName, c.name);
+
+      results.appendChild(row);
+    });
   }
-  family.cigars.forEach(function(c) {
-    var meta = "";
-    if (c.shape && c.shape !== "N/A") meta += " \u00b7 " + c.shape;
-    if (c.size  && c.size  !== "N/A") meta += " \u00b7 " + c.size;
-    var row = document.createElement("div");
-    row.className = "search-result-cigar";
-    row.textContent = c.name + meta;
-    (function(bn, fn, cn) { row.onclick = function() { selectCigar(bn, fn, cn); }; })(brandName, familyName, c.name);
-    results.appendChild(row);
-  });
-    // Custom cigars from Supabase
+
+  // Custom cigars from Supabase
   supa.from('custom_cigars')
     .select('*')
     .eq('brand', brandName)
@@ -1101,9 +1155,7 @@ function selectFamily(brandName, familyName) {
         results.appendChild(row);
       });
     });
-
 }
-
 
 async function selectCigar(brandName, familyName, cigar_name) {
   var brand = null, family = null, cigar = null;
