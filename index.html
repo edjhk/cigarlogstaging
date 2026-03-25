@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 104 -->
+ <meta charset="UTF-8"><!-- 105 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1042,28 +1042,6 @@ function selectFamily(brandName, familyName) {
   var results = document.getElementById("searchResults");
   results.innerHTML = "";
 
-  // Brand header band (half-width card)
-  var brandHeader = document.createElement('div');
-  brandHeader.style.cssText =
-    'background:linear-gradient(135deg, var(--dark-tobacco), var(--charcoal));' +
-    'border-radius:16px;padding:10px 14px;margin-bottom:8px;' +
-    'color:white;display:flex;justify-content:space-between;align-items:center;' +
-    'max-width:480px;';
-
-  var brandTitle = document.createElement('div');
-  brandTitle.style.cssText =
-    'font-family:Playfair Display,serif;font-size:0.95rem;font-weight:700;';
-  brandTitle.textContent = brandName;
-
-  var brandKey = document.createElement('div');
-  brandKey.style.cssText =
-    'font-size:0.7rem;color:rgba(255,255,255,0.75);text-align:right;';
-  brandKey.textContent = 'CA=Cigar Aficionado · CW=Cuban Website · CL=CigarLog';
-
-  brandHeader.appendChild(brandTitle);
-  brandHeader.appendChild(brandKey);
-  results.appendChild(brandHeader);
-
   // Family header band (match cigar card width)
   var familyHeader = document.createElement('div');
   familyHeader.style.cssText =
@@ -1088,24 +1066,8 @@ function selectFamily(brandName, familyName) {
 
   var familyTitle = document.createElement("div");
   familyTitle.style.cssText =
-    "font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--gold);margin-top:6px;";
+    "font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--gold);margin-left:10px;";
   familyTitle.textContent = familyName;
-
-  var familySubtitle = document.createElement("div");
-  familySubtitle.style.cssText =
-    "font-size:0.78rem;color:rgba(255,255,255,0.55);margin-top:2px;";
-  familySubtitle.textContent = brandName;
-
-  // Group title + subtitle
-  var familyInfo = document.createElement('div');
-  familyInfo.appendChild(familyTitle);
-  familyInfo.appendChild(familySubtitle);
-
-  // Compact key on the right
-  var familyKey = document.createElement('div');
-  familyKey.style.cssText =
-    'font-size:0.7rem;color:rgba(255,255,255,0.75);text-align:right;';
-  familyKey.textContent = 'CA=Cigar Aficionado · CW=Cuban Website · CL=CigarLog';
 
   familyHeader.appendChild(backBtn);
   familyHeader.appendChild(familyInfo);
