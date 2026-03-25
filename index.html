@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 107 -->
+ <meta charset="UTF-8"><!-- 108 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1658,21 +1658,55 @@ function openFullImage(url) {
 }
 
 async function postToFeedPage() {
+  try {
+    var input = document.getElementById('feedPageInput');
+    var fileInput = document.getElementById('feedPageFile');
+    var camInput = document.getElementById('feedPageCam');
 
-  var input = document.getElementById('feedPageInput');
-  var fileInput = document.getElementById('feedPageFile');
-  var camInput = document.getElementById('feedPageCam');
-  var text = input ? input.value.trim() : '';
-  var file = (fileInput && fileInput.files[0]) || (camInput && camInput.files[0]);
-  if (!text && !file) return;
-  if (!currentUser) return;
-  var photo_url = null;
-  if (file) { showToast('Uploading...'); photo_url = await uploadPhoto(file, 'feed'); if (!photo_url) { showToast('Upload failed.'); return; } }
-  if (fileInput) fileInput.value = '';
-  if (camInput) camInput.value = '';
-  if (input) input.value = '';
-  await supa.from('feed_posts').insert({ user_id: currentUser.supabaseId, username: (currentUser.displayName || currentUser.username), text: text || null, photo_url: photo_url });
-  renderFeedPage();
+    var text = input ? input.value.trim() : '';
+    var file = (fileInput && fileInput.files[0]) || (camInput && camInput.files[0]);
+
+    if (!text && !file) return;
+    if (!currentUser) return;
+
+    var photo_url = null;
+
+    if (file) {
+      showToast('Uploading...');
+      photo_url = await uploadPhoto(file, 'feed');
+
+      if (!photo_url) {
+        showToast('Upload failed.');
+        console.error('uploadPhoto returned null');  // <‑‑ new
+        return;
+      }
+    }
+
+    if (fileInput) fileInput.value = '';
+    if (camInput) camInput.value = '';
+    if (input) input.value = '';
+
+    // Try inserting into feed_posts and log any error
+    var { error } = await supa
+      .from('feed_posts')
+      .insert({
+        user_id: currentUser.supabaseId,
+        username: (currentUser.displayname || currentUser.username),
+        text: text || null,
+        photo_url: photo_url
+      });
+
+    if (error) {
+      console.error('feed_posts insert error:', error);  // <‑‑ new
+      showToast('Could not save post.');
+      return;
+    }
+
+    renderFeedPage();
+  } catch (e) {
+    console.error('postToFeedPage crashed:', e);  // <‑‑ catch any unexpected error
+    showToast('Something went wrong.');
+  }
 }
 
 
