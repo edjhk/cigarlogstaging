@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8"><!-- 106 -->
+ <meta charset="UTF-8"><!-- 107 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="icon" href="data:,">
 <title>CigarLog</title>
@@ -1197,9 +1197,9 @@ async function selectCigar(brandName, familyName, cigar_name) {
   sub.textContent = cigar.name;
 
 
-  // Score badges in the header
-  var scores = document.createElement("div");
-  scores.style.cssText = "display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;";
+// Score badges in the header
+var scores = document.createElement("div");
+scores.style.cssText = "display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;";
 scores.innerHTML = `
   ${caScore ? `<div style="background:rgba(0,0,0,0.3);border:1px solid rgba(201,168,76,0.6);border-radius:8px;padding:6px 12px;">
     <div style="color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.05em;font-size:0.68rem;">CA</div>
@@ -1214,10 +1214,20 @@ scores.innerHTML = `
     <div style="color:#7dd99a;font-weight:700;font-size:1.1rem;">${clScore}</div>
   </div>`;
 
-  tileHead.appendChild(backBtn);
-  tileHead.appendChild(title);
-  tileHead.appendChild(sub);
-  tileHead.appendChild(scores);
+// compact key under scores
+var smallKey = document.createElement('div');
+smallKey.style.cssText =
+  'margin-top:6px;font-size:0.7rem;color:rgba(255,255,255,0.75);';
+smallKey.textContent =
+  'CA=Cigar Aficionado · CW=Cuban Website · CL=CigarLog';
+
+tileHead.appendChild(backBtn);
+tileHead.appendChild(title);
+tileHead.appendChild(sub);
+tileHead.appendChild(scores);
+tileHead.appendChild(smallKey);
+
+
 
    // ── Actions (Log + Wishlist) ───────────────────────────────
   var actions = document.createElement('div');
@@ -1661,7 +1671,7 @@ async function postToFeedPage() {
   if (fileInput) fileInput.value = '';
   if (camInput) camInput.value = '';
   if (input) input.value = '';
-  await supa.from('feed_posts').insert({ user_id: currentUser.supabaseId, username: currentUser.displayName || currentUser.username, text: text || null, photo_url: photo_url });
+  await supa.from('feed_posts').insert({ user_id: currentUser.supabaseId, username: (currentUser.displayName || currentUser.username), text: text || null, photo_url: photo_url });
   renderFeedPage();
 }
 
